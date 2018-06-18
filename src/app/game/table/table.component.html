@@ -1,0 +1,38 @@
+<div class="table" fxLayout="row wrap" fxLayoutAlign="center">
+  <div fxFlex="15" fxLayoutAlign="center center">
+    <ceki-trash-card player='1'></ceki-trash-card>
+  </div>
+  <div fxFlex="27.5" fxLayoutAlign="center center">
+    <ceki-shadow-player player='2'></ceki-shadow-player>
+  </div>
+  <div fxFlex="15" fxLayoutAlign="center center">
+    <ceki-trash-card player='2'></ceki-trash-card>
+  </div>
+  <div fxFlex="27.5" fxLayoutAlign="center center">
+    <ceki-shadow-player player='3'></ceki-shadow-player>
+  </div>
+  <div fxFlex="15" fxLayoutAlign="center center">
+    <ceki-trash-card player='3'></ceki-trash-card>
+  </div>
+
+  <div fxFlex="15" fxLayoutAlign="center center">
+    <ceki-shadow-player [landscape]='true' align="start" player='1'></ceki-shadow-player>
+  </div>
+  <div fxFlex="70" fxLayoutAlign="center center">
+    <ceki-dealer-card></ceki-dealer-card>
+  </div>
+  <div fxFlex="15" fxLayoutAlign="center center">
+    <ceki-shadow-player [landscape]='true' align="end" player='4'></ceki-shadow-player>
+  </div>
+
+  <div fxFlex="15" fxLayoutAlign="center center">
+    <ceki-trash-card player='0' droppable (onDrop)="onCardDropInTrash($event)"></ceki-trash-card>
+  </div>
+  <div fxFlex="70" fxLayoutAlign="center center" droppable (onDrop)="onCardDropInMain($event)" (onDragEnter)="onCardEnterMain($event)"
+    (onDragLeave)="onCardLeaveMain($event)">
+    <ceki-main-player></ceki-main-player>
+  </div>
+  <div fxFlex="15" fxLayoutAlign="center center">
+    <ceki-trash-card player='4'></ceki-trash-card>
+  </div>
+</div>

@@ -1,0 +1,3 @@
+<div fxLayout fxLayoutAlign="center">
+  <ceki-card *ngFor="let c of cards; let i=index" draggable [cardNumber]='c' [dragData]="{value:c, index: i, type: 'main'}"></ceki-card>
+</div>

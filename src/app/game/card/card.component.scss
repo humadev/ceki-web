@@ -1,0 +1,71 @@
+.card {
+  box-shadow: 1px 1px 1px black;
+}
+
+.drag-border {
+  min-width: 70px;
+}
+
+.portrait.main {
+  width: 70px;
+  height: 146px;
+  margin: 0 5px;
+  display: inline-block;
+}
+
+.portrait.main.drag-over-border {
+  padding-left: 75px;
+}
+
+.portrait.main:hover {
+  margin-top: -5px;
+  box-shadow: 10px 10px 10px black;
+}
+
+.portrait.trash {
+  width: 70px;
+  height: 146px;
+  border-left: thin solid darkgray;
+  margin: 0px -33px;
+  display: inline-block;
+}
+
+.portrait.shadow {
+  width: 70px;
+  height: 146px;
+  border-left: thin solid darkgray;
+  margin: 0px -30px;
+  display: inline-block;
+}
+
+.portrait.dealer {
+  width: 70px;
+  height: 146px;
+  border-left: thin solid darkgray;
+  margin: 0px -33px;
+  display: inline-block;
+}
+
+.landscape.main {
+  height: 70px;
+  width: 146px;
+  margin: 5px 0;
+  display: block;
+}
+
+.landscape.shadow {
+  height: 70px;
+  width: 146px;
+  border-top: thin solid darkgray;
+  margin: -30px 0px;
+  display: block;
+}
+
+.open {
+  background-size: cover;
+}
+
+.closed {
+  background: green;
+  background-size: cover;
+}
