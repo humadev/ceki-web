@@ -13,8 +13,19 @@ export class MainPlayerComponent {
     this.cards = _engine.playersManifest[0].cards;
   }
 
-  removeCard(e, i) {
-    console.log(i);
-    this._engine.playersManifest[0].cards.splice(i, 1);
+  dropInOrder(e, c, i) {
+    const order = [];
+    if (e.dragData.index !== i) {
+      this.cards.forEach((card, index) => {
+        if (e.dragData.index !== index) {
+          if (i === index) {
+            order.push(e.dragData.value);
+          }
+          order.push(card);
+        }
+      });
+      this.cards = order;
+      this._engine.playersManifest[0].cards = order;
+    }
   }
 }

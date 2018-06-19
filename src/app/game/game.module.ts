@@ -9,13 +9,16 @@ import { ShadowPlayerComponent } from './shadow-player/shadow-player.component';
 import { DealerCardComponent } from './dealer-card/dealer-card.component';
 import { TrashCardComponent } from './trash-card/trash-card.component';
 import { NgDragDropModule } from 'ng-drag-drop';
+import { TrashOverviewComponent } from './trash-overview/trash-overview.component';
+import { MatDialogModule } from '@angular/material';
 
 @NgModule({
   imports: [
     CommonModule,
     GameRoutingModule,
     FlexLayoutModule,
-    NgDragDropModule.forRoot()
+    NgDragDropModule.forRoot(),
+    MatDialogModule
   ],
   declarations: [
     TableComponent,
@@ -23,7 +26,9 @@ import { NgDragDropModule } from 'ng-drag-drop';
     MainPlayerComponent,
     ShadowPlayerComponent,
     DealerCardComponent,
-    TrashCardComponent
-  ]
+    TrashCardComponent,
+    TrashOverviewComponent
+  ],
+  entryComponents: [TrashOverviewComponent]
 })
 export class GameModule {}

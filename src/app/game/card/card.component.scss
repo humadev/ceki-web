@@ -1,20 +1,12 @@
 .card {
-  box-shadow: 1px 1px 1px black;
-}
-
-.drag-border {
-  min-width: 70px;
+  box-shadow: 2px 2px 2px black;
 }
 
 .portrait.main {
   width: 70px;
   height: 146px;
-  margin: 0 5px;
+  margin: 0 0;
   display: inline-block;
-}
-
-.portrait.main.drag-over-border {
-  padding-left: 75px;
 }
 
 .portrait.main:hover {
@@ -30,12 +22,23 @@
   display: inline-block;
 }
 
+.portrait.trash.overview {
+  width: 25px;
+  height: 50px;
+  border-left: thin solid darkgray;
+  margin: 0px 1px;
+  transform: rotate(0deg);
+}
+
 .portrait.shadow {
   width: 70px;
   height: 146px;
-  border-left: thin solid darkgray;
-  margin: 0px -30px;
+  margin: 0px;
+  margin-left: -60px;
   display: inline-block;
+  border-left: thin solid darkgray;
+  box-shadow: 2px 2px 2px black;
+  background-size: cover;
 }
 
 .portrait.dealer {
@@ -68,4 +71,8 @@
 .closed {
   background: green;
   background-size: cover;
+}
+
+:host.drag-border {
+  display: none;
 }

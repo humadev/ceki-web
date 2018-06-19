@@ -10,8 +10,7 @@ export class TableComponent {
   constructor(private _engine: GameEngineService) {}
 
   onCardDropInMain(e) {
-    this._engine.playersManifest[0].cards.push(e.dragData.value);
-    this._engine.dealersCards.splice(e.dragData.index, 1);
+    this._engine.dropInMain(e);
   }
 
   onCardEnterMain(e) {
@@ -23,7 +22,6 @@ export class TableComponent {
   }
 
   onCardDropInTrash(e) {
-    this._engine.playersManifest[0].trash.push(e.dragData.value);
-    this._engine.playersManifest[0].cards.splice(e.dragData.index, 1);
+    this._engine.dropInTrash(e);
   }
 }

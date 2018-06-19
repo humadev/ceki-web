@@ -1,3 +1,6 @@
 <div fxLayout fxLayoutAlign="center">
-  <ceki-card *ngFor="let c of cards; let i=index" draggable [cardNumber]='c' [dragData]="{value:c, index: i, type: 'main'}"></ceki-card>
+  <ng-template ngFor let-card let-i="index" [ngForOf]="cards">
+    <span droppable dropScope="order" (onDrop)="dropInOrder($event, card, i)"></span>
+    <ceki-card draggable [cardNumber]='card' [dragData]="{value:card, index: i, type: 'main'}" [dragScope]="['order','trash']"></ceki-card>
+  </ng-template>
 </div>

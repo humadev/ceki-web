@@ -1,3 +1,4 @@
+import { WebsocketService } from './../shared/websocket.service';
 import { Injectable } from '@angular/core';
 
 @Injectable({
@@ -69,8 +70,12 @@ export class GameEngineService {
   ];
 
   dealersCards = [];
+  ws = new WebSocket('ws://localhost:8999');
 
-  constructor() {
+  constructor(private _ws: WebsocketService) {
+    this.ws.onmessage = res => {
+      this.playersManifest = res.data;
+    };
     this.playingCards = [
       ...this.cards,
       ...this.cards,
@@ -94,6 +99,22 @@ export class GameEngineService {
       } else {
         this.dealersCards.push(cards);
       }
+    }
+  }
+
+  dropInMain(e) {
+    if (this.playersManifest[0].cards.length < 12) {
+      this.ws.send(JSON.stringify(this.playersManifest));
+      this.playersManifest[0].cards.push(e.dragData.value);
+      this.dealersCards.splice(e.dragData.index, 1);
+    }
+  }
+
+  dropInTrash(e) {
+    if (this.playersManifest[0].cards.length > 10) {
+      this.ws.send(JSON.stringify(this.playersManifest));
+      this.playersManifest[0].trash.push(e.dragData.value);
+      this.playersManifest[0].cards.splice(e.dragData.index, 1);
     }
   }
 
