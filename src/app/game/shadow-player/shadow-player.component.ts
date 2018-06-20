@@ -18,6 +18,9 @@ export class ShadowPlayerComponent implements OnInit {
 
   ngOnInit() {
     this.cards = this._engine.playersManifest[this.player].cards;
+    this._engine.gamePlay.subscribe(res => {
+      this.cards = res[this.player].cards;
+    });
     if (this.landscape) {
       this.class = ['landscape', 'shadow', 'closed'];
       this.set = 'column';

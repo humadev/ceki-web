@@ -19,6 +19,9 @@ export class TrashCardComponent implements OnInit {
 
   ngOnInit() {
     this.cards = this._engine.playersManifest[this.player].trash;
+    this._engine.gamePlay.subscribe(res => {
+      this.cards = res[this.player].trash;
+    });
   }
 
   randomRotate() {

@@ -1,5 +1,7 @@
+import { Subject, of } from 'rxjs';
 import { WebsocketService } from './../shared/websocket.service';
 import { Injectable } from '@angular/core';
+import { map } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -69,13 +71,13 @@ export class GameEngineService {
     }
   ];
 
+  gamePlay = new Subject();
+
   dealersCards = [];
-  ws = new WebSocket('ws://localhost:8999');
+  ws;
+  messages: Subject<any>;
 
   constructor(private _ws: WebsocketService) {
-    this.ws.onmessage = res => {
-      this.playersManifest = res.data;
-    };
     this.playingCards = [
       ...this.cards,
       ...this.cards,
@@ -100,21 +102,37 @@ export class GameEngineService {
         this.dealersCards.push(cards);
       }
     }
+    this.gamePlay.next(this.playersManifest);
+  }
+
+  connectRoom(id) {
+    this.ws = new WebSocket('ws://localhost:8999/room/' + id);
+    return of(this.ws);
+  }
+
+  onMessage() {
+    this.ws.onmessage = res => {
+      console.log(res.data);
+      if (res.data.length) {
+        this.playersManifest = JSON.parse(res.data);
+        this.gamePlay.next(JSON.parse(res.data));
+      }
+    };
   }
 
   dropInMain(e) {
     if (this.playersManifest[0].cards.length < 12) {
-      this.ws.send(JSON.stringify(this.playersManifest));
       this.playersManifest[0].cards.push(e.dragData.value);
       this.dealersCards.splice(e.dragData.index, 1);
+      this.ws.send(JSON.stringify(this.playersManifest));
     }
   }
 
   dropInTrash(e) {
     if (this.playersManifest[0].cards.length > 10) {
-      this.ws.send(JSON.stringify(this.playersManifest));
       this.playersManifest[0].trash.push(e.dragData.value);
       this.playersManifest[0].cards.splice(e.dragData.index, 1);
+      this.ws.send(JSON.stringify(this.playersManifest));
     }
   }
 

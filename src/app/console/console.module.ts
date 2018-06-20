@@ -4,7 +4,17 @@ import { CommonModule } from '@angular/common';
 import { ConsoleRoutingModule } from './console-routing.module';
 import { ConsoleComponent } from './console/console.component';
 import { LayoutModule } from '@angular/cdk/layout';
-import { MatToolbarModule, MatButtonModule, MatSidenavModule, MatIconModule, MatListModule } from '@angular/material';
+import {
+  MatToolbarModule,
+  MatButtonModule,
+  MatSidenavModule,
+  MatIconModule,
+  MatListModule,
+  MatTabsModule
+} from '@angular/material';
+import { ProfileComponent } from './profile/profile.component';
+import { PlayRoomComponent } from './play-room/play-room.component';
+import { HistoryComponent } from './history/history.component';
 
 @NgModule({
   imports: [
@@ -15,8 +25,14 @@ import { MatToolbarModule, MatButtonModule, MatSidenavModule, MatIconModule, Mat
     MatButtonModule,
     MatSidenavModule,
     MatIconModule,
-    MatListModule
+    MatListModule,
+    MatTabsModule
   ],
-  declarations: [ConsoleComponent]
+  declarations: [
+    ConsoleComponent,
+    ProfileComponent,
+    PlayRoomComponent,
+    HistoryComponent
+  ]
 })
-export class ConsoleModule { }
+export class ConsoleModule {}

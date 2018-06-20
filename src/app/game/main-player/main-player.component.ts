@@ -11,6 +11,9 @@ export class MainPlayerComponent {
 
   constructor(private _engine: GameEngineService) {
     this.cards = _engine.playersManifest[0].cards;
+    this._engine.gamePlay.subscribe(res => {
+      this.cards = res[0].cards;
+    });
   }
 
   dropInOrder(e, c, i) {
@@ -26,6 +29,7 @@ export class MainPlayerComponent {
       });
       this.cards = order;
       this._engine.playersManifest[0].cards = order;
+      this._engine.ws.send(JSON.stringify(this._engine.playersManifest));
     }
   }
 }
