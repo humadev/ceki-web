@@ -15,6 +15,10 @@ const routes: Routes = [
         component: ProfileComponent
       },
       {
+        path: 'play/:roomID',
+        component: PlayRoomComponent
+      },
+      {
         path: 'play',
         component: PlayRoomComponent
       },

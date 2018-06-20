@@ -105,11 +105,6 @@ export class GameEngineService {
     this.gamePlay.next(this.playersManifest);
   }
 
-  connectRoom(id) {
-    this.ws = new WebSocket('ws://localhost:8999/room/' + id);
-    return of(this.ws);
-  }
-
   onMessage() {
     this.ws.onmessage = res => {
       console.log(res.data);

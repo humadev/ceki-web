@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { GameEngineService } from '../../game/game-engine.service';
 import { WebsocketService } from '../../shared/websocket.service';
 import { map } from 'rxjs/operators';
+import { Router, ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'ceki-play-room',
@@ -9,19 +10,28 @@ import { map } from 'rxjs/operators';
   styleUrls: ['./play-room.component.scss']
 })
 export class PlayRoomComponent implements OnInit {
+
+  room;
+
   constructor(
     private _engine: GameEngineService,
-    private _ws: WebsocketService
-  ) {}
+    private _ws: WebsocketService,
+    private _router: ActivatedRoute
+  ) {
+    _router.paramMap.subscribe((res:any) => {
+      if(res.params.roomID) {
+        this.room = res.params.roomID;
+      } else {
+        this.room = this.createRoom();
+        console.log(this.room);
+      }
+    });
+  }
 
   ngOnInit() {
-    const socket = this._ws.connect().pipe(
-      map(
-        (response: any): any => {
-          console.log(response);
-        }
-      )
-    );
+    this._ws.socket.on(this.room, data => {
+      console.log(data);
+    });
   }
 
   createRoom() {
@@ -32,12 +42,10 @@ export class PlayRoomComponent implements OnInit {
       Math.random()
         .toString(36)
         .substring(2, 15);
-    this._engine.connectRoom(id).subscribe(res => {
-      this._engine.onMessage();
-    });
+    return id;
   }
 
   countUser() {
-    this._engine.ws.send('test');
+    this._ws.socket.emit('send room', {room: this.room, data: 'huma'});
   }
 }
