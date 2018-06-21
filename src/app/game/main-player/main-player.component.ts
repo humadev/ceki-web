@@ -1,5 +1,6 @@
 import { GameEngineService } from './../game-engine.service';
 import { Component, OnInit, Input } from '@angular/core';
+import { WebsocketService } from '../../shared/websocket.service';
 
 @Component({
   selector: 'ceki-main-player',
@@ -9,7 +10,7 @@ import { Component, OnInit, Input } from '@angular/core';
 export class MainPlayerComponent {
   @Input() cards = [];
 
-  constructor(private _engine: GameEngineService) {
+  constructor(private _engine: GameEngineService, private _ws: WebsocketService) {
     this.cards = _engine.playersManifest[0].cards;
     this._engine.gamePlay.subscribe(res => {
       this.cards = res[0].cards;
@@ -29,7 +30,7 @@ export class MainPlayerComponent {
       });
       this.cards = order;
       this._engine.playersManifest[0].cards = order;
-      this._engine.ws.send(JSON.stringify(this._engine.playersManifest));
+        this._ws.socket.emit('send room', this._engine.playersManifest);
     }
   }
 }

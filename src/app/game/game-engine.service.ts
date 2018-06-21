@@ -78,6 +78,10 @@ export class GameEngineService {
   messages: Subject<any>;
 
   constructor(private _ws: WebsocketService) {
+      this._ws.socket.on('move', data => {
+          this.playersManifest = data;
+          this.gamePlay.next(this.playersManifest);
+      });
     this.playingCards = [
       ...this.cards,
       ...this.cards,
@@ -117,9 +121,9 @@ export class GameEngineService {
 
   dropInMain(e) {
     if (this.playersManifest[0].cards.length < 12) {
-      this.playersManifest[0].cards.push(e.dragData.value);
-      this.dealersCards.splice(e.dragData.index, 1);
-      this.ws.send(JSON.stringify(this.playersManifest));
+        this.playersManifest[0].cards.push(e.dragData.value);
+        this.dealersCards.splice(e.dragData.index, 1);
+        this._ws.socket.emit('send room', this.playersManifest);
     }
   }
 
@@ -127,7 +131,7 @@ export class GameEngineService {
     if (this.playersManifest[0].cards.length > 10) {
       this.playersManifest[0].trash.push(e.dragData.value);
       this.playersManifest[0].cards.splice(e.dragData.index, 1);
-      this.ws.send(JSON.stringify(this.playersManifest));
+        this._ws.socket.emit('send room', this.playersManifest);
     }
   }
 

@@ -15,6 +15,7 @@ import {
 import { ProfileComponent } from './profile/profile.component';
 import { PlayRoomComponent } from './play-room/play-room.component';
 import { HistoryComponent } from './history/history.component';
+import { FormsModule } from '@angular/forms';
 
 @NgModule({
   imports: [
@@ -26,7 +27,8 @@ import { HistoryComponent } from './history/history.component';
     MatSidenavModule,
     MatIconModule,
     MatListModule,
-    MatTabsModule
+    MatTabsModule,
+    FormsModule
   ],
   declarations: [
     ConsoleComponent,
