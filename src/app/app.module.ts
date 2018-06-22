@@ -13,8 +13,7 @@ import { environment } from '../environments/environment';
   imports: [
     BrowserModule,
     AppRoutingModule,
-    BrowserAnimationsModule,
-    AngularFireModule.initializeApp(environment.firebase)
+    BrowserAnimationsModule
   ],
   providers: [],
   bootstrap: [AppComponent]

@@ -16,6 +16,7 @@ import { ProfileComponent } from './profile/profile.component';
 import { PlayRoomComponent } from './play-room/play-room.component';
 import { HistoryComponent } from './history/history.component';
 import { FormsModule } from '@angular/forms';
+import { SharedModule } from '../shared/shared.module';
 
 @NgModule({
   imports: [
@@ -28,7 +29,8 @@ import { FormsModule } from '@angular/forms';
     MatIconModule,
     MatListModule,
     MatTabsModule,
-    FormsModule
+    FormsModule,
+    SharedModule
   ],
   declarations: [
     ConsoleComponent,
