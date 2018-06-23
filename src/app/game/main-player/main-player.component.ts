@@ -10,10 +10,13 @@ import { WebsocketService } from '../../shared/websocket.service';
 export class MainPlayerComponent {
   @Input() cards = [];
 
-  constructor(private _engine: GameEngineService, private _ws: WebsocketService) {
-    this.cards = _engine.playersManifest[0].cards;
+  constructor(
+    private _engine: GameEngineService,
+    private _ws: WebsocketService
+  ) {
+    this.cards = _engine.playersManifest[this._engine.playerIndex].cards;
     this._engine.gamePlay.subscribe(res => {
-      this.cards = res[0].cards;
+      this.cards = res[this._engine.playerIndex].cards;
     });
   }
 
@@ -29,8 +32,8 @@ export class MainPlayerComponent {
         }
       });
       this.cards = order;
-      this._engine.playersManifest[0].cards = order;
-        this._ws.socket.emit('send room', this._engine.playersManifest);
+      this._engine.playersManifest[this._engine.playerIndex].cards = order;
+      this._ws.socket.emit('send room', this._engine.playersManifest);
     }
   }
 }

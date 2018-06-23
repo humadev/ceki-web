@@ -1,9 +1,10 @@
 <div>
-    <button mat-raised-button color="primary" (click)="createRoom()">Create Room</button>
-    <input type='text' [(ngModel)]="room">
-    <button mat-raised-button color="primary" (click)="joinRoom()">Join Room</button>
+  <button mat-raised-button color="primary" (click)="createRoom()">Create Room</button>
+  <input type='text' [(ngModel)]="room">
+  <button mat-raised-button color="primary" (click)="joinRoom()">Join Room</button>
+  <button mat-raised-button color="primary" (click)="play()">Play</button>
 </div>
 <p>{{roomID}}</p>
 <ul>
-    <li *ngFor="let player of players">{{player.name}} | {{player.email}}</li>
+  <li *ngFor="let player of players">{{player.name}} | {{player.email}}</li>
 </ul>

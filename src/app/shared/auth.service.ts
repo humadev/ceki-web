@@ -6,11 +6,18 @@ import { auth } from 'firebase/app';
   providedIn: 'root'
 })
 export class AuthService {
-    users;
+  users;
 
-    constructor(public afAuth: AngularFireAuth) {
-        afAuth.user.subscribe(res => this.users = res);
-    }
+  constructor(public afAuth: AngularFireAuth) {
+    afAuth.user.subscribe(
+      res => {
+        this.users = res;
+      },
+      err => {
+        console.log(err);
+      }
+    );
+  }
 
   loginWithFacebook() {
     return this.afAuth.auth.signInWithPopup(new auth.FacebookAuthProvider());

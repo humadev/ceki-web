@@ -10,8 +10,7 @@ import { AuthService } from '../../shared/auth.service';
   styleUrls: ['./play-room.component.scss']
 })
 export class PlayRoomComponent implements OnInit {
-
-    roomID: any;
+  roomID: any;
   room;
   players = [];
 
@@ -20,48 +19,49 @@ export class PlayRoomComponent implements OnInit {
     private _ws: WebsocketService,
     private _router: ActivatedRoute,
     private _auth: AuthService
-  ) {
-  }
+  ) {}
 
-  ngOnInit() {
-  }
+  ngOnInit() {}
 
   createRoom() {
-      this.players = [{
-          name: this._auth.users.displayName,
-          email: this._auth.users.email
-      }];
-      this._ws.socket.emit('create room', 'test');
-      this._ws.socket.on('create room', data => {
-          this.roomID = data.roomID;
-          console.log(data.roomID);
-        this._ws.socket.on(data.roomID, msg => {
-            switch (msg.type) {
-                case 'join':
-                    this.players.push(msg.data);
-                    this._ws.socket.emit('update room', {roomID: this.roomID, type: 'players', data: this.players});
-                    break;
-                default:
-                    break;
-            }
-        })
-      });
+    const player = {
+      name: this._auth.users.displayName,
+      email: this._auth.users.email
+    };
+    this.players.push(player);
+    this._ws.socket.emit('create room', player);
+    this._engine.initiator = true;
+    this._ws.socket.on('create room', data => {
+      this.roomID = data.roomID;
+      this._engine.roomID = data.roomID;
+    });
+    this._ws.socket.on('room', msg => {
+      console.log('join from creator', msg);
+      this.players = msg;
+    });
   }
 
   joinRoom() {
-      this._ws.socket.on(this.room, data => {
-          switch (data.type) {
-              case 'players':
-                  this.players = data.data;
-                  break;
-              default:
-                  break;
-          }
-      });
-      this._ws.socket.emit('join room', { roomID: this.room, name: this._auth.users.displayName, email: this._auth.users.email});
+    this._ws.socket.on('room', data => {
+      console.log('join from joiner', data);
+      this.players = data;
+    });
+    this._ws.socket.on('join room', data => {
+      console.log(data.index);
+      this._engine.playerIndex = data.index;
+    });
+    this._ws.socket.emit('join room', {
+      roomID: this.room,
+      name: this._auth.users.displayName,
+      email: this._auth.users.email
+    });
+  }
+
+  play() {
+    this._engine.play();
   }
 
   countUser() {
-    this._ws.socket.emit('send room', {room: this.room, data: 'huma'});
+    this._ws.socket.emit('send room', { room: this.room, data: 'huma' });
   }
 }

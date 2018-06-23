@@ -17,6 +17,7 @@ import { PlayRoomComponent } from './play-room/play-room.component';
 import { HistoryComponent } from './history/history.component';
 import { FormsModule } from '@angular/forms';
 import { SharedModule } from '../shared/shared.module';
+import { WebsocketService } from '../shared/websocket.service';
 
 @NgModule({
   imports: [
@@ -37,6 +38,7 @@ import { SharedModule } from '../shared/shared.module';
     ProfileComponent,
     PlayRoomComponent,
     HistoryComponent
-  ]
+  ],
+  providers: []
 })
 export class ConsoleModule {}

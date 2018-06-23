@@ -6,7 +6,11 @@ import { AngularFireModule } from 'angularfire2';
 import { environment } from '../../environments/environment';
 
 @NgModule({
-    imports: [CommonModule, AngularFireAuthModule, AngularFireModule.initializeApp(environment.firebase)],
+  imports: [
+    CommonModule,
+    AngularFireAuthModule,
+    AngularFireModule.initializeApp(environment.firebase)
+  ],
   declarations: [],
   providers: [AuthService]
 })
