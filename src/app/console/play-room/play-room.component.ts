@@ -42,6 +42,7 @@ export class PlayRoomComponent implements OnInit {
   }
 
   joinRoom() {
+    this._engine.roomID = this.room;
     this._ws.socket.on('room', data => {
       console.log('join from joiner', data);
       this.players = data;

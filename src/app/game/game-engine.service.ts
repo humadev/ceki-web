@@ -47,6 +47,9 @@ export class GameEngineService {
   initiator = false;
   messages: Subject<any>;
   playerIndex = 0;
+  turn = false;
+  pick = 0;
+  throw = 0;
 
   constructor(private _ws: WebsocketService, private router: Router) {
     this._ws.socket.on('play', data => {
@@ -61,31 +64,50 @@ export class GameEngineService {
       this.playersManifest[data.index].trash = data.trash;
       this.dealersCards = data.dealers;
       this.gamePlay.next(this.playersManifest);
+      console.log(this.itsMyIndex(data.index));
+      if (data.turning && this.itsMyIndex(data.index)) {
+        this.turn = true;
+        this.pick = 1;
+        this.throw = 1;
+        alert('giliranmu!');
+      }
     });
 
     this.gamePlay.next(this.playersManifest);
   }
 
   play() {
+    this.turn = true;
+    this.pick = 1;
+    this.throw = 1;
     this._ws.socket.emit('init play', { roomID: this.roomID });
   }
 
   dropInMain(e) {
-    if (this.playersManifest[this.playerIndex].cards.length < 12) {
+    if (this.pick === 1) {
       this.playersManifest[this.playerIndex].cards.push(e.dragData.value);
       this.dealersCards.splice(e.dragData.index, 1);
+      this.pick = 0;
+      if (this.pick === 0 && this.throw === 0) {
+        this.turn = false;
+      }
       this._ws.socket.emit('move', {
         card: this.playersManifest[this.playerIndex].cards,
         trash: this.playersManifest[this.playerIndex].trash,
         index: this.playerIndex,
         roomID: this.roomID,
-        dealers: this.dealersCards
+        dealers: this.dealersCards,
+        turning: !this.turn
       });
     }
   }
 
   dropInTrash(e) {
-    if (this.playersManifest[this.playerIndex].cards.length > 10) {
+    if (this.throw === 1) {
+      this.throw = 0;
+      if (this.pick === 0 && this.throw === 0) {
+        this.turn = false;
+      }
       this.playersManifest[this.playerIndex].trash.push(e.dragData.value);
       this.playersManifest[this.playerIndex].cards.splice(e.dragData.index, 1);
       this._ws.socket.emit('move', {
@@ -93,8 +115,21 @@ export class GameEngineService {
         trash: this.playersManifest[this.playerIndex].trash,
         index: this.playerIndex,
         roomID: this.roomID,
-        dealers: this.dealersCards
+        dealers: this.dealersCards,
+        turning: !this.turn
       });
+    }
+  }
+
+  itsMyIndex(index) {
+    let obsIndex = index + 1;
+    if (obsIndex > 4) {
+      obsIndex -= 5;
+    }
+    if (obsIndex === this.playerIndex) {
+      return true;
+    } else {
+      return false;
     }
   }
 }

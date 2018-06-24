@@ -7,7 +7,11 @@ import { Component, OnInit, ViewEncapsulation } from '@angular/core';
   styleUrls: ['./table.component.scss']
 })
 export class TableComponent {
-  constructor(private _engine: GameEngineService) {}
+  playerIndex = 0;
+
+  constructor(private _engine: GameEngineService) {
+    this.playerIndex = this._engine.playerIndex;
+  }
 
   onCardDropInMain(e) {
     this._engine.dropInMain(e);
@@ -23,5 +27,14 @@ export class TableComponent {
 
   onCardDropInTrash(e) {
     this._engine.dropInTrash(e);
+  }
+
+  shadowPlayerIndex(turn) {
+    let turnIndex = this.playerIndex + turn;
+    if (turnIndex > 4) {
+      turnIndex -= 5;
+    }
+
+    return turnIndex;
   }
 }
