@@ -50,12 +50,41 @@ export class GameEngineService {
   turn = false;
   pick = 0;
   throw = 0;
+  init = false;
 
   constructor(private _ws: WebsocketService, private router: Router) {
+    this._ws.socket.on('rejoin room', data => {
+      this.playersManifest = data.gameState.players;
+      this.dealersCards = data.gameState.dealers;
+      this.turn = data.gameState.players[this.playerIndex].turn;
+      this.pick = data.gameState.players[this.playerIndex].pick;
+      this.throw = data.gameState.players[this.playerIndex].throw;
+      this.gamePlay.next(this.playersManifest);
+    });
+
+    if (this.init === false) {
+      const gameState = JSON.parse(localStorage.getItem('gs'));
+      if (gameState) {
+        this.roomID = gameState.rid;
+        this.init = true;
+        this.playerIndex = gameState.pi;
+        this._ws.socket.emit('rejoin room', { roomID: this.roomID });
+      }
+    }
+
     this._ws.socket.on('play', data => {
       this.playersManifest = data.players;
       this.dealersCards = data.dealers;
       this.gamePlay.next(this.playersManifest);
+      this.init = true;
+      localStorage.setItem(
+        'gs',
+        JSON.stringify({
+          rid: this.roomID,
+          i: this.initiator,
+          pi: this.playerIndex
+        })
+      );
       this.router.navigate(['game']);
     });
 
@@ -97,7 +126,9 @@ export class GameEngineService {
         index: this.playerIndex,
         roomID: this.roomID,
         dealers: this.dealersCards,
-        turning: !this.turn
+        turning: !this.turn,
+        pick: this.pick,
+        throw: this.throw
       });
     }
   }
@@ -116,7 +147,9 @@ export class GameEngineService {
         index: this.playerIndex,
         roomID: this.roomID,
         dealers: this.dealersCards,
-        turning: !this.turn
+        turning: !this.turn,
+        pick: this.pick,
+        throw: this.throw
       });
     }
   }

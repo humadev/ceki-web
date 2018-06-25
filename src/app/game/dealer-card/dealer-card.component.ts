@@ -11,6 +11,9 @@ export class DealerCardComponent {
 
   constructor(private _engine: GameEngineService) {
     this.cards = _engine.dealersCards;
+    this._engine.gamePlay.subscribe(res => {
+      this.cards = _engine.dealersCards;
+    });
   }
 
   removeCard(e, i) {
