@@ -6,6 +6,7 @@
       <a mat-list-item routerLink="profile">Profile</a>
       <a mat-list-item routerLink="play">Play</a>
       <a mat-list-item routerLink="history">History</a>
+      <a mat-list-item (click)="logout($event)">logout</a>
     </mat-nav-list>
   </mat-sidenav>
   <mat-sidenav-content>
@@ -14,6 +15,7 @@
         <mat-icon aria-label="Side nav toggle icon">menu</mat-icon>
       </button>
       <span *ngIf="!drawer.opened">Ceki Online</span>
+      <span class='welcoming'>Welcome, {{name}}</span>
     </mat-toolbar>
     <router-outlet></router-outlet>
   </mat-sidenav-content>

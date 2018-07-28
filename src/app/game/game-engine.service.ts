@@ -54,6 +54,7 @@ export class GameEngineService {
 
   constructor(private _ws: WebsocketService, private router: Router) {
     this._ws.socket.on('rejoin room', data => {
+      console.log(data);
       this.playersManifest = data.gameState.players;
       this.dealersCards = data.gameState.dealers;
       this.turn = data.gameState.players[this.playerIndex].turn;
@@ -65,6 +66,7 @@ export class GameEngineService {
     if (this.init === false) {
       const gameState = JSON.parse(localStorage.getItem('gs'));
       if (gameState) {
+        console.log(gameState.pi);
         this.roomID = gameState.rid;
         this.init = true;
         this.playerIndex = gameState.pi;
@@ -89,6 +91,7 @@ export class GameEngineService {
     });
 
     this._ws.socket.on('move', data => {
+      console.log(data);
       this.playersManifest[data.index].cards = data.card;
       this.playersManifest[data.index].trash = data.trash;
       this.dealersCards = data.dealers;
@@ -128,7 +131,8 @@ export class GameEngineService {
         dealers: this.dealersCards,
         turning: !this.turn,
         pick: this.pick,
-        throw: this.throw
+        throw: this.throw,
+        date: new Date()
       });
     }
   }
@@ -149,7 +153,8 @@ export class GameEngineService {
         dealers: this.dealersCards,
         turning: !this.turn,
         pick: this.pick,
-        throw: this.throw
+        throw: this.throw,
+        date: new Date()
       });
     }
   }

@@ -8,7 +8,13 @@ import { Router } from '@angular/router';
   styleUrls: ['./login.component.scss']
 })
 export class LoginComponent {
-  constructor(private auth: AuthService, private _route: Router) {}
+  constructor(private auth: AuthService, private _route: Router) {
+    this.auth.afAuth.authState.subscribe(res => {
+      if (this.auth.users) {
+        this._route.navigate(['console']);
+      }
+    });
+  }
 
   async facebook() {
     const login = await this.auth.loginWithFacebook();
