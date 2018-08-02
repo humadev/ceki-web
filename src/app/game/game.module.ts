@@ -1,3 +1,4 @@
+import { SharedModule } from './../shared/shared.module';
 import { GameRoutingModule } from './game-routing.module';
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -10,7 +11,6 @@ import { DealerCardComponent } from './dealer-card/dealer-card.component';
 import { TrashCardComponent } from './trash-card/trash-card.component';
 import { NgDragDropModule } from 'ng-drag-drop';
 import { TrashOverviewComponent } from './trash-overview/trash-overview.component';
-import { MatDialogModule } from '@angular/material';
 
 @NgModule({
   imports: [
@@ -18,7 +18,7 @@ import { MatDialogModule } from '@angular/material';
     GameRoutingModule,
     FlexLayoutModule,
     NgDragDropModule.forRoot(),
-    MatDialogModule
+    SharedModule
   ],
   declarations: [
     TableComponent,

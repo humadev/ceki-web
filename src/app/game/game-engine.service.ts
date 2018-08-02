@@ -40,6 +40,9 @@ export class GameEngineService {
   ];
 
   gamePlay = new Subject();
+  gameLogs = new Subject();
+  autoMove = new Subject();
+  myTurn: Subject<boolean> = new Subject();
 
   dealersCards = [];
   ws;
@@ -54,19 +57,24 @@ export class GameEngineService {
 
   constructor(private _ws: WebsocketService, private router: Router) {
     this._ws.socket.on('rejoin room', data => {
-      console.log(data);
+      this.gameLogs.next(
+        `mulai kembali permainan sebagai pemain ${this.playerIndex + 1}`
+      );
       this.playersManifest = data.gameState.players;
       this.dealersCards = data.gameState.dealers;
       this.turn = data.gameState.players[this.playerIndex].turn;
       this.pick = data.gameState.players[this.playerIndex].pick;
       this.throw = data.gameState.players[this.playerIndex].throw;
+      if (this.turn) {
+        this.gameLogs.next(`pemain mendapatkan giliran`);
+        this.myTurn.next(true);
+      }
       this.gamePlay.next(this.playersManifest);
     });
 
     if (this.init === false) {
       const gameState = JSON.parse(localStorage.getItem('gs'));
       if (gameState) {
-        console.log(gameState.pi);
         this.roomID = gameState.rid;
         this.init = true;
         this.playerIndex = gameState.pi;
@@ -88,24 +96,35 @@ export class GameEngineService {
         })
       );
       this.router.navigate(['game']);
+      this.gameLogs.next(
+        `mulai permainan sebagai pemain ${this.playerIndex + 1}`
+      );
     });
 
     this._ws.socket.on('move', data => {
-      console.log(data);
+      const timeNow = new Date();
+      this.gameLogs.next(
+        'Round trip time from websocket ' +
+          (timeNow.getTime() - data.date + ' ms')
+      );
       this.playersManifest[data.index].cards = data.card;
       this.playersManifest[data.index].trash = data.trash;
       this.dealersCards = data.dealers;
       this.gamePlay.next(this.playersManifest);
-      console.log(this.itsMyIndex(data.index));
       if (data.turning && this.itsMyIndex(data.index)) {
+        this.gameLogs.next(`pemain mendapatkan giliran`);
         this.turn = true;
         this.pick = 1;
         this.throw = 1;
-        alert('giliranmu!');
+        this.myTurn.next(true);
       }
     });
 
     this.gamePlay.next(this.playersManifest);
+
+    this.autoMove.subscribe(res => {
+      this.autoMoveCard();
+    });
   }
 
   play() {
@@ -122,7 +141,10 @@ export class GameEngineService {
       this.pick = 0;
       if (this.pick === 0 && this.throw === 0) {
         this.turn = false;
+        this.myTurn.next(false);
       }
+      const dateMove = new Date();
+      this.gameLogs.next(`emit ke channel 'move' saat kartu pindah ke pemain`);
       this._ws.socket.emit('move', {
         card: this.playersManifest[this.playerIndex].cards,
         trash: this.playersManifest[this.playerIndex].trash,
@@ -132,7 +154,7 @@ export class GameEngineService {
         turning: !this.turn,
         pick: this.pick,
         throw: this.throw,
-        date: new Date()
+        date: dateMove.getTime()
       });
     }
   }
@@ -142,9 +164,14 @@ export class GameEngineService {
       this.throw = 0;
       if (this.pick === 0 && this.throw === 0) {
         this.turn = false;
+        this.myTurn.next(false);
       }
       this.playersManifest[this.playerIndex].trash.push(e.dragData.value);
       this.playersManifest[this.playerIndex].cards.splice(e.dragData.index, 1);
+      const dateMove = new Date();
+      this.gameLogs.next(
+        `emit ke channel 'move' saat kartu pindah ke pembuangan`
+      );
       this._ws.socket.emit('move', {
         card: this.playersManifest[this.playerIndex].cards,
         trash: this.playersManifest[this.playerIndex].trash,
@@ -154,7 +181,7 @@ export class GameEngineService {
         turning: !this.turn,
         pick: this.pick,
         throw: this.throw,
-        date: new Date()
+        date: dateMove.getTime()
       });
     }
   }
@@ -169,5 +196,41 @@ export class GameEngineService {
     } else {
       return false;
     }
+  }
+
+  autoMoveCard() {
+    console.log('automove');
+    const cardToMain = this.dealersCards[0];
+    const cardToTrash = this.playersManifest[this.playerIndex].cards[
+      this.playersManifest[this.playerIndex].cards.length - 1
+    ];
+
+    // drop to trash
+    this.throw = 0;
+    this.playersManifest[this.playerIndex].trash.push(cardToTrash);
+    this.playersManifest[this.playerIndex].cards.splice(
+      this.playersManifest[this.playerIndex].cards.length - 1,
+      1
+    );
+
+    this.gameLogs.next(`auto emit ke channel 'move' saat waktu habis`);
+
+    // drop to main
+    this.playersManifest[this.playerIndex].cards.push(cardToMain);
+    this.dealersCards.splice(0, 1);
+    this.pick = 0;
+    this.turn = false;
+    const dateMove = new Date();
+    this._ws.socket.emit('move', {
+      card: this.playersManifest[this.playerIndex].cards,
+      trash: this.playersManifest[this.playerIndex].trash,
+      index: this.playerIndex,
+      roomID: this.roomID,
+      dealers: this.dealersCards,
+      turning: true,
+      pick: this.pick,
+      throw: this.throw,
+      date: dateMove.getTime()
+    });
   }
 }

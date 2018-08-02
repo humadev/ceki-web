@@ -24,7 +24,9 @@ export class ConsoleComponent {
     private auth: AuthService
   ) {
     this.auth.afAuth.authState.subscribe(res => {
-      this.name = this.auth.afAuth.auth.currentUser.displayName;
+      if (this.auth.afAuth.auth.currentUser) {
+        this.name = this.auth.afAuth.auth.currentUser.displayName;
+      }
     });
   }
 

@@ -3,4 +3,5 @@
     <span droppable dropScope="order" (onDrop)="dropInOrder($event, card, i)"></span>
     <ceki-card draggable [cardNumber]='card' [dragData]="{value:card, index: i, type: 'main'}" [dragScope]="['order','trash']"></ceki-card>
   </ng-template>
+  <mat-progress-bar *ngIf="myTurn" mode="determinate" [value]="turnTime" class="turn-time"></mat-progress-bar>
 </div>

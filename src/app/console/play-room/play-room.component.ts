@@ -65,4 +65,8 @@ export class PlayRoomComponent implements OnInit {
   countUser() {
     this._ws.socket.emit('send room', { room: this.room, data: 'huma' });
   }
+
+  clearRoom() {
+    localStorage.removeItem('gs');
+  }
 }

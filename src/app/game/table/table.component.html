@@ -1,3 +1,9 @@
+<div class="benchmark" *ngIf="benchmark">
+  <h3>game logs</h3>
+  <ul>
+    <li *ngFor="let log of logs">{{log}}</li>
+  </ul>
+</div>
 <div class="table" fxLayout="row wrap" fxLayoutAlign="center">
   <div fxFlex="15" fxLayoutAlign="center center">
     <ceki-trash-card [player]='shadowPlayerIndex(3)'></ceki-trash-card>

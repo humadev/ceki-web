@@ -8,9 +8,12 @@ import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 })
 export class TableComponent {
   playerIndex = 0;
+  logs = [];
+  benchmark = true;
 
   constructor(private _engine: GameEngineService) {
     this.playerIndex = this._engine.playerIndex;
+    this._engine.gameLogs.subscribe(res => this.logs.push(res));
   }
 
   onCardDropInMain(e) {
