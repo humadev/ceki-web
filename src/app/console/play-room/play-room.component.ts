@@ -3,7 +3,7 @@ import { GameEngineService } from '../../game/game-engine.service';
 import { WebsocketService } from '../../shared/websocket.service';
 import { ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../shared/auth.service';
-import * as Peer from 'peerjs';
+import { WebrtcService } from '../../shared/webrtc.service';
 
 @Component({
   selector: 'ceki-play-room',
@@ -14,21 +14,26 @@ export class PlayRoomComponent implements OnInit {
   roomID: any;
   room;
   players = [];
-  peer = new Peer({host: 'http://localhost', port: 3000, path: '/webrtc'}); 
 
   constructor(
     private _engine: GameEngineService,
     private _ws: WebsocketService,
+    private _rtc: WebrtcService,
     private _router: ActivatedRoute,
     private _auth: AuthService
   ) {}
 
   ngOnInit() {
-    this.peer.connect('test');
+    this._auth.afAuth.authState.subscribe(res => {
+      if (this._auth.afAuth.auth.currentUser) {
+        this._rtc.open(this._auth.users.uid);
+      }
+    });
   }
 
   createRoom() {
     const player = {
+      uid: this._auth.users.uid,
       name: this._auth.users.displayName,
       email: this._auth.users.email
     };
@@ -40,7 +45,7 @@ export class PlayRoomComponent implements OnInit {
       this._engine.roomID = data.roomID;
     });
     this._ws.socket.on('room', msg => {
-      console.log('join from creator', msg);
+      this._rtc.connecting(msg[msg.length - 1].uid);
       this.players = msg;
     });
   }
@@ -48,15 +53,15 @@ export class PlayRoomComponent implements OnInit {
   joinRoom() {
     this._engine.roomID = this.room;
     this._ws.socket.on('room', data => {
-      console.log('join from joiner', data);
+      this._rtc.connecting(data[0].uid);
       this.players = data;
     });
     this._ws.socket.on('join room', data => {
-      console.log(data.index);
       this._engine.playerIndex = data.index;
     });
     this._ws.socket.emit('join room', {
       roomID: this.room,
+      uid: this._auth.users.uid,
       name: this._auth.users.displayName,
       email: this._auth.users.email
     });
@@ -70,7 +75,11 @@ export class PlayRoomComponent implements OnInit {
     this._ws.socket.emit('send room', { room: this.room, data: 'huma' });
   }
 
-  clearRoom() {
+  clearRoom(e) {
     localStorage.removeItem('gs');
+  }
+
+  sendRTC(e) {
+    this._rtc.sendAll(this.players);
   }
 }
