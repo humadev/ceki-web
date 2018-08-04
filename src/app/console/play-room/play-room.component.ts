@@ -3,6 +3,7 @@ import { GameEngineService } from '../../game/game-engine.service';
 import { WebsocketService } from '../../shared/websocket.service';
 import { ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../shared/auth.service';
+import * as Peer from 'peerjs';
 
 @Component({
   selector: 'ceki-play-room',
@@ -13,6 +14,7 @@ export class PlayRoomComponent implements OnInit {
   roomID: any;
   room;
   players = [];
+  peer = new Peer({host: 'http://localhost', port: 3000, path: '/webrtc'}); 
 
   constructor(
     private _engine: GameEngineService,
@@ -21,7 +23,9 @@ export class PlayRoomComponent implements OnInit {
     private _auth: AuthService
   ) {}
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.peer.connect('test');
+  }
 
   createRoom() {
     const player = {
