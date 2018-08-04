@@ -45,7 +45,6 @@ export class PlayRoomComponent implements OnInit {
       this._engine.roomID = data.roomID;
     });
     this._ws.socket.on('room', msg => {
-      this._rtc.connecting(msg[msg.length - 1].uid);
       this.players = msg;
     });
   }
@@ -53,7 +52,6 @@ export class PlayRoomComponent implements OnInit {
   joinRoom() {
     this._engine.roomID = this.room;
     this._ws.socket.on('room', data => {
-      this._rtc.connecting(data[0].uid);
       this.players = data;
     });
     this._ws.socket.on('join room', data => {
@@ -68,6 +66,7 @@ export class PlayRoomComponent implements OnInit {
   }
 
   play() {
+    this._engine.playersID = this.players;
     this._engine.play();
   }
 

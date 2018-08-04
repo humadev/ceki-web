@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import * as Peer from 'peerjs';
+import { Subject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -8,6 +9,7 @@ export class WebrtcService {
   peer;
   connections = [];
   temp;
+  $message = new Subject();
 
   open(id) {
     this.peer = new Peer(id, {
@@ -47,6 +49,7 @@ export class WebrtcService {
   }
 
   onDataConnection(data) {
+    this.$message.next(data);
     console.log('received data ', data);
   }
 

@@ -3,6 +3,7 @@ import { WebsocketService } from './../shared/websocket.service';
 import { Injectable } from '@angular/core';
 import { map } from 'rxjs/operators';
 import { Router } from '@angular/router';
+import { WebrtcService } from '../shared/webrtc.service';
 
 @Injectable({
   providedIn: 'root'
@@ -43,6 +44,7 @@ export class GameEngineService {
   gameLogs = new Subject();
   autoMove = new Subject();
   myTurn: Subject<boolean> = new Subject();
+  playersID = [];
 
   dealersCards = [];
   ws;
@@ -55,7 +57,11 @@ export class GameEngineService {
   throw = 0;
   init = false;
 
-  constructor(private _ws: WebsocketService, private router: Router) {
+  constructor(
+    private _rtc: WebrtcService,
+    private _ws: WebsocketService,
+    private router: Router
+  ) {
     this._ws.socket.on('rejoin room', data => {
       this.gameLogs.next(
         `mulai kembali permainan sebagai pemain ${this.playerIndex + 1}`
@@ -101,7 +107,7 @@ export class GameEngineService {
       );
     });
 
-    this._ws.socket.on('move', data => {
+    this._rtc.$message.subscribe((data: any) => {
       const timeNow = new Date();
       this.gameLogs.next(
         'Round trip time from websocket ' +
@@ -128,6 +134,9 @@ export class GameEngineService {
   }
 
   play() {
+    this.playersID.forEach(player => {
+      this._rtc.connecting(player.uid);
+    });
     this.turn = true;
     this.pick = 1;
     this.throw = 1;
@@ -145,7 +154,7 @@ export class GameEngineService {
       }
       const dateMove = new Date();
       this.gameLogs.next(`emit ke channel 'move' saat kartu pindah ke pemain`);
-      this._ws.socket.emit('move', {
+      this._rtc.sendAll({
         card: this.playersManifest[this.playerIndex].cards,
         trash: this.playersManifest[this.playerIndex].trash,
         index: this.playerIndex,
@@ -172,7 +181,7 @@ export class GameEngineService {
       this.gameLogs.next(
         `emit ke channel 'move' saat kartu pindah ke pembuangan`
       );
-      this._ws.socket.emit('move', {
+      this._rtc.sendAll({
         card: this.playersManifest[this.playerIndex].cards,
         trash: this.playersManifest[this.playerIndex].trash,
         index: this.playerIndex,

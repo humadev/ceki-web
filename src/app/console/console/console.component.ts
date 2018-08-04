@@ -25,7 +25,7 @@ export class ConsoleComponent {
   ) {
     this.auth.afAuth.authState.subscribe(res => {
       if (this.auth.afAuth.auth.currentUser) {
-        this.name = this.auth.afAuth.auth.currentUser.displayName;
+        this.name = this.auth.afAuth.auth.currentUser.email;
       }
     });
   }
