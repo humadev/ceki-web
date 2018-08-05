@@ -1,10 +1,11 @@
 <h2 mat-dialog-title>Siapkan pemain</h2>
-<mat-dialog-content>
-  <h3>{{roomID}}</h3>
-  <ul>
-    <li *ngFor="let player of players">{{player.name}} | {{player.email}}</li>
-  </ul>
-</mat-dialog-content>
-<mat-dialog-actions>
-  <button mat-raised-button color="primary" (click)="play()">Play</button>
-</mat-dialog-actions>
+<p>Room ID : {{roomID}}</p>
+<div class="players">
+  <mat-card *ngFor="let player of players">
+    <mat-card-title>{{player.name}}</mat-card-title>
+    <img mat-card-image [src]="player.photo">
+  </mat-card>
+</div>
+<div class='actions'>
+  <button mat-raised-button color="warn" (click)="play()">Play</button>
+</div>

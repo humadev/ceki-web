@@ -11,10 +11,11 @@ import { AuthService } from '../../shared/auth.service';
 @Component({
   selector: 'ceki-console',
   templateUrl: './console.component.html',
-  styleUrls: ['./console.component.css']
+  styleUrls: ['./console.component.scss']
 })
 export class ConsoleComponent {
   name;
+  photo;
   isHandset$: Observable<boolean> = this.breakpointObserver
     .observe(Breakpoints.Handset)
     .pipe(map(result => result.matches));
@@ -25,7 +26,8 @@ export class ConsoleComponent {
   ) {
     this.auth.afAuth.authState.subscribe(res => {
       if (this.auth.afAuth.auth.currentUser) {
-        this.name = this.auth.afAuth.auth.currentUser.email;
+        this.name = this.auth.afAuth.auth.currentUser.displayName;
+        this.photo = this.auth.afAuth.auth.currentUser.photoURL;
       }
     });
   }

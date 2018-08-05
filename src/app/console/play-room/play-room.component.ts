@@ -29,7 +29,10 @@ export class PlayRoomComponent implements OnDestroy {
 
   createRoom() {
     this._rtc.open(this._auth.users.uid);
-    this.$createRoom = this._dialog.open(RoomComponent);
+    this.$createRoom = this._dialog.open(RoomComponent, {
+      height: '500px',
+      width: '800px'
+    });
   }
 
   joinRoom() {
@@ -37,7 +40,9 @@ export class PlayRoomComponent implements OnDestroy {
     this.$joinRoom = this._dialog.open(JoinRoomComponent, {
       data: {
         roomID: this.room
-      }
+      },
+      height: '500px',
+      width: '800px'
     });
   }
 

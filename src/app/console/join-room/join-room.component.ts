@@ -32,7 +32,8 @@ export class JoinRoomComponent implements OnInit {
       roomID: this.data.roomID,
       uid: this._auth.users.uid,
       name: this._auth.users.displayName,
-      email: this._auth.users.email
+      email: this._auth.users.email,
+      photo: this._auth.users.photoURL
     });
   }
 }

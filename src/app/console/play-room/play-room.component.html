@@ -1,35 +1,7 @@
-<div class='container'>
-  <mat-card class="card">
-    <mat-card-header>
-      <mat-card-title>Join Room</mat-card-title>
-      <mat-card-subtitle>Dog Breed</mat-card-subtitle>
-    </mat-card-header>
-    <mat-card-content>
-      <p>
-        The Shiba Inu is the smallest of the six original and distinct spitz breeds of dog from Japan. A small, agile dog that copes
-        very well with mountainous terrain, the Shiba Inu was originally bred for hunting.
-      </p>
-    </mat-card-content>
-    <mat-card-actions>
-      <button mat-raised-button color="primary" (click)="createRoom()">Create Room</button>
-    </mat-card-actions>
-  </mat-card>
-
-
-  <mat-card class="card">
-    <mat-card-header>
-      <mat-card-title>Join Room</mat-card-title>
-      <mat-card-subtitle>Dog Breed</mat-card-subtitle>
-    </mat-card-header>
-    <mat-card-content>
-      <p>
-        The Shiba Inu is the smallest of the six original and distinct spitz breeds of dog from Japan. A small, agile dog that copes
-        very well with mountainous terrain, the Shiba Inu was originally bred for hunting.
-      </p>
-      <input type='text' [(ngModel)]="room">
-    </mat-card-content>
-    <mat-card-actions>
-      <button mat-raised-button color="primary" (click)="joinRoom()">Join Room</button>
-    </mat-card-actions>
-  </mat-card>
+<div class="room">
+  <div class="button-room" (click)="createRoom()">Create Room</div>
+  <div class="button-room">
+    <input type='text' [(ngModel)]="room" class='text'>
+    <div (click)="joinRoom()">Join Room</div>
+  </div>
 </div>

@@ -1,0 +1,21 @@
+.mat-card {
+  display: inline-block;
+  margin-right: 10px;
+  .mat-card-title {
+    font-size: 12px;
+  }
+  width: 80px;
+  height: 100px;
+}
+
+.players {
+  clear: both;
+}
+
+.actions {
+  margin-top: 100px;
+  text-align: center;
+  button {
+    padding: 10px;
+  }
+}
