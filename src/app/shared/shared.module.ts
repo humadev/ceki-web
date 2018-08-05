@@ -14,7 +14,6 @@ import {
   MatDialogModule,
   MatProgressBarModule
 } from '@angular/material';
-import { WebrtcService } from './webrtc.service';
 
 @NgModule({
   imports: [
@@ -41,6 +40,6 @@ import { WebrtcService } from './webrtc.service';
     MatProgressBarModule
   ],
   declarations: [],
-  providers: [AuthService, GameEngineService, WebrtcService]
+  providers: [AuthService, GameEngineService]
 })
 export class SharedModule {}

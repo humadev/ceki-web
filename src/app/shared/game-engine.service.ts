@@ -2,7 +2,6 @@ import { Subject } from 'rxjs';
 import { WebsocketService } from './websocket.service';
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
-import { WebrtcService } from './webrtc.service';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from './auth.service';
 
@@ -31,7 +30,6 @@ export class GameEngineService {
   init = false;
 
   constructor(
-    private _rtc: WebrtcService,
     private _ws: WebsocketService,
     private router: Router,
     private http: HttpClient,
@@ -44,14 +42,7 @@ export class GameEngineService {
       this.playersManifest = data.gameState.players;
       this.dealersCards = data.gameState.dealers;
       this.gamePlay.next(data.gameState.players);
-      this._rtc.$init.subscribe(res => {
-        this.playersManifest.forEach((player: any) => {
-          if (player.uid !== this.auth.users.uid) {
-            console.log('trying connecting to peer: ', player.uid);
-            this._rtc.connecting(player.uid);
-          }
-        });
-      });
+
       this.turn = data.gameState.players[this.playerIndex].turn;
       this.pick = data.gameState.players[this.playerIndex].pick;
       this.throw = data.gameState.players[this.playerIndex].throw;
@@ -73,12 +64,6 @@ export class GameEngineService {
     }
 
     this._ws.socket.on('play', data => {
-      data.players.forEach(player => {
-        if (player.uid !== this.auth.users.uid) {
-          console.log('trying connecting to peer: ', player.uid);
-          this._rtc.connecting(player.uid);
-        }
-      });
       this.players = data.players.length;
       this.playersManifest = data.players;
       this.dealersCards = data.dealers;
@@ -99,13 +84,14 @@ export class GameEngineService {
       );
     });
 
-    this._rtc.$message.subscribe((data: any) => {
+    this._ws.socket.on('move', (data: any) => {
       const timeNow = new Date();
       this.gameLogs.next(
-        'Round trip time from webrtc ' + (timeNow.getTime() - data.date + ' ms')
+        'Round trip time from websocket ' +
+          (timeNow.getTime() - data.date + ' ms')
       );
       console.log(
-        'received from rtc connection in ' +
+        'received from websocket connection in ' +
           (timeNow.getTime() - data.date + ' ms')
       );
       this.playersManifest[data.index].cards = data.card;
@@ -145,9 +131,7 @@ export class GameEngineService {
         this.myTurn.next(false);
       }
       const dateMove = new Date();
-      this.gameLogs.next(
-        `broadcast koneksi webrtc saat kartu pindah ke pemain`
-      );
+      this.gameLogs.next(`mengirim data ke server saat kartu pindah ke pemain`);
       const moveData = {
         card: this.playersManifest[this.playerIndex].cards,
         trash: this.playersManifest[this.playerIndex].trash,
@@ -160,10 +144,7 @@ export class GameEngineService {
         throw: this.throw,
         date: dateMove.getTime()
       };
-      this._rtc.sendAll(moveData);
-      this.http
-        .post('http://188.166.250.103:3000/record', moveData)
-        .subscribe(res => console.log('record in server'));
+      this._ws.socket.emit('move', moveData);
     }
   }
 
@@ -178,7 +159,7 @@ export class GameEngineService {
       this.playersManifest[this.playerIndex].cards.splice(e.dragData.index, 1);
       const dateMove = new Date();
       this.gameLogs.next(
-        `broadcast koneksi webrtc saat kartu pindah ke pembuangan`
+        `mengirim data ke server saat kartu pindah ke pembuangan`
       );
       const moveData = {
         card: this.playersManifest[this.playerIndex].cards,
@@ -192,10 +173,7 @@ export class GameEngineService {
         throw: this.throw,
         date: dateMove.getTime()
       };
-      this._rtc.sendAll(moveData);
-      this.http
-        .post('http://188.166.250.103:3000/record', moveData)
-        .subscribe(res => console.log('record in server'));
+      this._ws.socket.emit('move', moveData);
     }
   }
 
@@ -226,7 +204,7 @@ export class GameEngineService {
       1
     );
 
-    this.gameLogs.next(`broadcast koneksi webrtc saat waktu habis`);
+    this.gameLogs.next(`mengirim data ke server saat waktu habis`);
 
     // drop to main
     this.playersManifest[this.playerIndex].cards.push(cardToMain);
@@ -246,10 +224,7 @@ export class GameEngineService {
       throw: this.throw,
       date: dateMove.getTime()
     };
-    this._rtc.sendAll(moveData);
-    this.http
-      .post('http://188.166.250.103:3000/record', moveData)
-      .subscribe(res => console.log('record in server'));
+    this._ws.socket.emit('move', moveData);
   }
 
   whosTurn(index) {
