@@ -41,6 +41,6 @@ import { WebrtcService } from './webrtc.service';
     MatProgressBarModule
   ],
   declarations: [],
-  providers: [AuthService, GameEngineService, WebrtcService]
+  providers: [AuthService, GameEngineService]
 })
 export class SharedModule {}

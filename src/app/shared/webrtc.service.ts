@@ -3,7 +3,9 @@ import * as Peer from 'peerjs';
 import { Subject } from 'rxjs';
 import { AuthService } from './auth.service';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class WebrtcService {
   peer;
   connections = [];
@@ -12,12 +14,7 @@ export class WebrtcService {
   $init = new Subject();
 
   constructor(private auth: AuthService) {
-    this.auth.afAuth.authState.subscribe(user => {
-      console.log(!this.peer);
-      if (user && !this.peer) {
-        this.open(user.uid);
-      }
-    });
+    console.log('webrtc constructor');
   }
 
   open(id) {
