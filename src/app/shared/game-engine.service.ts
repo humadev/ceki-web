@@ -1,44 +1,17 @@
-import { Subject, of } from 'rxjs';
-import { WebsocketService } from './../shared/websocket.service';
+import { Subject } from 'rxjs';
+import { WebsocketService } from './websocket.service';
 import { Injectable } from '@angular/core';
-import { map } from 'rxjs/operators';
 import { Router } from '@angular/router';
-import { WebrtcService } from '../shared/webrtc.service';
+import { WebrtcService } from './webrtc.service';
+import { HttpClient } from '@angular/common/http';
+import { AuthService } from './auth.service';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable()
 export class GameEngineService {
-  players = 5;
+  players: number;
 
   playingCards = [];
-  playersManifest = [
-    {
-      name: 'Player 1',
-      cards: [],
-      trash: []
-    },
-    {
-      name: 'Player 2',
-      cards: [],
-      trash: []
-    },
-    {
-      name: 'Player 3',
-      cards: [],
-      trash: []
-    },
-    {
-      name: 'Player 4',
-      cards: [],
-      trash: []
-    },
-    {
-      name: 'Player 5',
-      cards: [],
-      trash: []
-    }
-  ];
+  playersManifest = [];
 
   gamePlay = new Subject();
   gameLogs = new Subject();
@@ -60,7 +33,9 @@ export class GameEngineService {
   constructor(
     private _rtc: WebrtcService,
     private _ws: WebsocketService,
-    private router: Router
+    private router: Router,
+    private http: HttpClient,
+    private auth: AuthService
   ) {
     this._ws.socket.on('rejoin room', data => {
       this.gameLogs.next(
@@ -68,6 +43,15 @@ export class GameEngineService {
       );
       this.playersManifest = data.gameState.players;
       this.dealersCards = data.gameState.dealers;
+      this.gamePlay.next(data.gameState.players);
+      this._rtc.$init.subscribe(res => {
+        this.playersManifest.forEach((player: any) => {
+          if (player.uid !== this.auth.users.uid) {
+            console.log('trying connecting to peer: ', player.uid);
+            this._rtc.connecting(player.uid);
+          }
+        });
+      });
       this.turn = data.gameState.players[this.playerIndex].turn;
       this.pick = data.gameState.players[this.playerIndex].pick;
       this.throw = data.gameState.players[this.playerIndex].throw;
@@ -75,7 +59,6 @@ export class GameEngineService {
         this.gameLogs.next(`pemain mendapatkan giliran`);
         this.myTurn.next(true);
       }
-      this.gamePlay.next(this.playersManifest);
     });
 
     if (this.init === false) {
@@ -83,12 +66,20 @@ export class GameEngineService {
       if (gameState) {
         this.roomID = gameState.rid;
         this.init = true;
+        this.players = gameState.p;
         this.playerIndex = gameState.pi;
         this._ws.socket.emit('rejoin room', { roomID: this.roomID });
       }
     }
 
     this._ws.socket.on('play', data => {
+      data.players.forEach(player => {
+        if (player.uid !== this.auth.users.uid) {
+          console.log('trying connecting to peer: ', player.uid);
+          this._rtc.connecting(player.uid);
+        }
+      });
+      this.players = data.players.length;
       this.playersManifest = data.players;
       this.dealersCards = data.dealers;
       this.gamePlay.next(this.playersManifest);
@@ -97,6 +88,7 @@ export class GameEngineService {
         'gs',
         JSON.stringify({
           rid: this.roomID,
+          p: this.players,
           i: this.initiator,
           pi: this.playerIndex
         })
@@ -110,7 +102,10 @@ export class GameEngineService {
     this._rtc.$message.subscribe((data: any) => {
       const timeNow = new Date();
       this.gameLogs.next(
-        'Round trip time from websocket ' +
+        'Round trip time from webrtc ' + (timeNow.getTime() - data.date + ' ms')
+      );
+      console.log(
+        'received from rtc connection in ' +
           (timeNow.getTime() - data.date + ' ms')
       );
       this.playersManifest[data.index].cards = data.card;
@@ -134,9 +129,6 @@ export class GameEngineService {
   }
 
   play() {
-    this.playersID.forEach(player => {
-      this._rtc.connecting(player.uid);
-    });
     this.turn = true;
     this.pick = 1;
     this.throw = 1;
@@ -153,18 +145,25 @@ export class GameEngineService {
         this.myTurn.next(false);
       }
       const dateMove = new Date();
-      this.gameLogs.next(`emit ke channel 'move' saat kartu pindah ke pemain`);
-      this._rtc.sendAll({
+      this.gameLogs.next(
+        `broadcast koneksi webrtc saat kartu pindah ke pemain`
+      );
+      const moveData = {
         card: this.playersManifest[this.playerIndex].cards,
         trash: this.playersManifest[this.playerIndex].trash,
         index: this.playerIndex,
         roomID: this.roomID,
         dealers: this.dealersCards,
         turning: !this.turn,
+        turnIndex: this.whosTurn(this.playerIndex),
         pick: this.pick,
         throw: this.throw,
         date: dateMove.getTime()
-      });
+      };
+      this._rtc.sendAll(moveData);
+      this.http
+        .post('http://188.166.250.103:3000/record', moveData)
+        .subscribe(res => console.log('record in server'));
     }
   }
 
@@ -179,26 +178,31 @@ export class GameEngineService {
       this.playersManifest[this.playerIndex].cards.splice(e.dragData.index, 1);
       const dateMove = new Date();
       this.gameLogs.next(
-        `emit ke channel 'move' saat kartu pindah ke pembuangan`
+        `broadcast koneksi webrtc saat kartu pindah ke pembuangan`
       );
-      this._rtc.sendAll({
+      const moveData = {
         card: this.playersManifest[this.playerIndex].cards,
         trash: this.playersManifest[this.playerIndex].trash,
         index: this.playerIndex,
         roomID: this.roomID,
         dealers: this.dealersCards,
         turning: !this.turn,
+        turnIndex: this.whosTurn(this.playerIndex),
         pick: this.pick,
         throw: this.throw,
         date: dateMove.getTime()
-      });
+      };
+      this._rtc.sendAll(moveData);
+      this.http
+        .post('http://188.166.250.103:3000/record', moveData)
+        .subscribe(res => console.log('record in server'));
     }
   }
 
   itsMyIndex(index) {
     let obsIndex = index + 1;
-    if (obsIndex > 4) {
-      obsIndex -= 5;
+    if (obsIndex > this.players - 1) {
+      obsIndex -= this.players;
     }
     if (obsIndex === this.playerIndex) {
       return true;
@@ -222,7 +226,7 @@ export class GameEngineService {
       1
     );
 
-    this.gameLogs.next(`auto emit ke channel 'move' saat waktu habis`);
+    this.gameLogs.next(`broadcast koneksi webrtc saat waktu habis`);
 
     // drop to main
     this.playersManifest[this.playerIndex].cards.push(cardToMain);
@@ -230,16 +234,29 @@ export class GameEngineService {
     this.pick = 0;
     this.turn = false;
     const dateMove = new Date();
-    this._ws.socket.emit('move', {
+    const moveData = {
       card: this.playersManifest[this.playerIndex].cards,
       trash: this.playersManifest[this.playerIndex].trash,
       index: this.playerIndex,
       roomID: this.roomID,
       dealers: this.dealersCards,
-      turning: true,
+      turning: !this.turn,
+      turnIndex: this.whosTurn(this.playerIndex),
       pick: this.pick,
       throw: this.throw,
       date: dateMove.getTime()
-    });
+    };
+    this._rtc.sendAll(moveData);
+    this.http
+      .post('http://188.166.250.103:3000/record', moveData)
+      .subscribe(res => console.log('record in server'));
+  }
+
+  whosTurn(index) {
+    let obsIndex = index + 1;
+    if (obsIndex > this.players - 1) {
+      obsIndex -= this.players;
+    }
+    return obsIndex;
   }
 }

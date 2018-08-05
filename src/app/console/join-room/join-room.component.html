@@ -1,0 +1,7 @@
+<h2 mat-dialog-title>Siapkan pemain</h2>
+<mat-dialog-content>
+  <h3>{{roomID}}</h3>
+  <ul>
+    <li *ngFor="let player of players">{{player.name}} | {{player.email}}</li>
+  </ul>
+</mat-dialog-content>

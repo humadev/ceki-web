@@ -1,4 +1,4 @@
-import { GameEngineService } from './../game-engine.service';
+import { GameEngineService } from './../../shared/game-engine.service';
 import { Component, OnInit, Input, HostListener } from '@angular/core';
 import { MatDialog } from '@angular/material';
 import { TrashOverviewComponent } from '../trash-overview/trash-overview.component';
@@ -15,14 +15,16 @@ export class TrashCardComponent implements OnInit {
   overview = false;
   rotate = true;
 
-  constructor(private _engine: GameEngineService, private _dialog: MatDialog) {}
-
-  ngOnInit() {
-    this.cards = this._engine.playersManifest[this.player].trash;
+  constructor(private _engine: GameEngineService, private _dialog: MatDialog) {
+    // this.cards = this._engine.playersManifest[this.player].trash;
     this._engine.gamePlay.subscribe(res => {
-      this.cards = res[this.player].trash;
+      if (res[this.player]) {
+        this.cards = res[this.player].trash;
+      }
     });
   }
+
+  ngOnInit() {}
 
   randomRotate() {
     let num = Math.floor(Math.random() * 90); // this will get a number between 1 and 99;

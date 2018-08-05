@@ -33,16 +33,3 @@
     </mat-card-actions>
   </mat-card>
 </div>
-
-<div>
-
-
-
-  <button mat-raised-button color="primary" (click)="play()">Play</button>
-</div>
-<button mat-raised-button (click)="clearRoom($event)">clear room</button>
-<button mat-raised-button (click)="sendRTC($event)">send RTC</button>
-<p>{{roomID}}</p>
-<ul>
-  <li *ngFor="let player of players">{{player.name}} | {{player.email}}</li>
-</ul>

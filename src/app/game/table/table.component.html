@@ -4,7 +4,7 @@
     <li *ngFor="let log of logs">{{log}}</li>
   </ul>
 </div>
-<div class="table" fxLayout="row wrap" fxLayoutAlign="center">
+<div class="table" fxLayout="row wrap" fxLayoutAlign="center" *ngIf='_engine.init && players == 5'>
   <div fxFlex="15" fxLayoutAlign="center center">
     <ceki-trash-card [player]='shadowPlayerIndex(3)'></ceki-trash-card>
   </div>
@@ -39,5 +39,82 @@
   </div>
   <div fxFlex="15" fxLayoutAlign="center center">
     <ceki-trash-card [player]='playerIndex' droppable (onDrop)="onCardDropInTrash($event)" dropScope="trash"></ceki-trash-card>
+  </div>
+</div>
+
+<div class="table" fxLayout="row wrap" fxLayoutAlign="center" *ngIf='_engine.init && players == 4'>
+  <div fxFlex="15" fxLayoutAlign="center center">
+    <ceki-trash-card [player]='shadowPlayerIndex(2)'></ceki-trash-card>
+  </div>
+  <div fxFlex="70" fxLayoutAlign="center center">
+    <ceki-shadow-player [player]='shadowPlayerIndex(2)'></ceki-shadow-player>
+  </div>
+  <div fxFlex="15" fxLayoutAlign="center center">
+    <ceki-trash-card [player]='shadowPlayerIndex(1)'></ceki-trash-card>
+  </div>
+
+  <div fxFlex="15" fxLayoutAlign="center center">
+    <ceki-shadow-player [landscape]='true' align="start" [player]='shadowPlayerIndex(3)'></ceki-shadow-player>
+  </div>
+  <div fxFlex="70" fxLayoutAlign="center center">
+    <ceki-dealer-card></ceki-dealer-card>
+  </div>
+  <div fxFlex="15" fxLayoutAlign="center center">
+    <ceki-shadow-player [landscape]='true' align="end" [player]='shadowPlayerIndex(1)'></ceki-shadow-player>
+  </div>
+
+  <div fxFlex="15" fxLayoutAlign="center center">
+    <ceki-trash-card [player]='shadowPlayerIndex(3)'></ceki-trash-card>
+  </div>
+  <div fxFlex="70" fxLayoutAlign="center center" droppable (onDrop)="onCardDropInMain($event)">
+    <ceki-main-player></ceki-main-player>
+  </div>
+  <div fxFlex="15" fxLayoutAlign="center center">
+    <ceki-trash-card [player]='playerIndex' droppable (onDrop)="onCardDropInTrash($event)" dropScope="trash"></ceki-trash-card>
+  </div>
+</div>
+
+<div class="table" fxLayout="row wrap" fxLayoutAlign="center" *ngIf='_engine.init && players == 3'>
+  <div fxFlex="100" fxLayoutAlign="center center">
+    <ceki-trash-card [player]='shadowPlayerIndex(1)'></ceki-trash-card>
+  </div>
+
+  <div fxFlex="15" fxLayoutAlign="center center">
+    <ceki-shadow-player [landscape]='true' align="start" [player]='shadowPlayerIndex(2)'></ceki-shadow-player>
+  </div>
+  <div fxFlex="70" fxLayoutAlign="center center">
+    <ceki-dealer-card></ceki-dealer-card>
+  </div>
+  <div fxFlex="15" fxLayoutAlign="center center">
+    <ceki-shadow-player [landscape]='true' align="end" [player]='shadowPlayerIndex(1)'></ceki-shadow-player>
+  </div>
+
+  <div fxFlex="15" fxLayoutAlign="center center">
+    <ceki-trash-card [player]='shadowPlayerIndex(2)'></ceki-trash-card>
+  </div>
+  <div fxFlex="70" fxLayoutAlign="center center" droppable (onDrop)="onCardDropInMain($event)">
+    <ceki-main-player></ceki-main-player>
+  </div>
+  <div fxFlex="15" fxLayoutAlign="center center">
+    <ceki-trash-card [player]='playerIndex' droppable (onDrop)="onCardDropInTrash($event)" dropScope="trash"></ceki-trash-card>
+  </div>
+</div>
+<div class="table" fxLayout="row wrap" fxLayoutAlign="center" *ngIf='_engine.init && players === 2'>
+  <div fxFlex="100" fxLayoutAlign="center center">
+    <ceki-shadow-player [player]='shadowPlayerIndex(1)'></ceki-shadow-player>
+  </div>
+
+  <div fxFlex="15" fxLayoutAlign="center center">
+    <ceki-trash-card [player]='shadowPlayerIndex(1)'></ceki-trash-card>
+  </div>
+  <div fxFlex="70" fxLayoutAlign="center center">
+    <ceki-dealer-card></ceki-dealer-card>
+  </div>
+  <div fxFlex="15" fxLayoutAlign="center center">
+    <ceki-trash-card [player]='playerIndex' droppable (onDrop)="onCardDropInTrash($event)" dropScope="trash"></ceki-trash-card>
+  </div>
+
+  <div fxFlex="100" fxLayoutAlign="center center" droppable (onDrop)="onCardDropInMain($event)">
+    <ceki-main-player></ceki-main-player>
   </div>
 </div>

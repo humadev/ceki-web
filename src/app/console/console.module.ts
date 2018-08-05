@@ -9,6 +9,8 @@ import { ProfileComponent } from './profile/profile.component';
 import { PlayRoomComponent } from './play-room/play-room.component';
 import { HistoryComponent } from './history/history.component';
 import { FormsModule } from '@angular/forms';
+import { RoomComponent } from './room/room.component';
+import { JoinRoomComponent } from './join-room/join-room.component';
 
 @NgModule({
   imports: [
@@ -22,8 +24,11 @@ import { FormsModule } from '@angular/forms';
     ConsoleComponent,
     ProfileComponent,
     PlayRoomComponent,
-    HistoryComponent
+    HistoryComponent,
+    RoomComponent,
+    JoinRoomComponent
   ],
-  providers: []
+  providers: [],
+  entryComponents: [RoomComponent, JoinRoomComponent]
 })
 export class ConsoleModule {}

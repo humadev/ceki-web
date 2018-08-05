@@ -1,4 +1,4 @@
-import { GameEngineService } from './../game-engine.service';
+import { GameEngineService } from './../../shared/game-engine.service';
 import { Component, Input, OnInit } from '@angular/core';
 import { WebsocketService } from '../../shared/websocket.service';
 import {
@@ -29,10 +29,13 @@ export class MainPlayerComponent implements OnInit {
     private _engine: GameEngineService,
     private _ws: WebsocketService
   ) {
-    this.cards = _engine.playersManifest[this._engine.playerIndex].cards;
+    // this.cards = this._engine.playersManifest[this._engine.playerIndex].cards;
     this._engine.gamePlay.subscribe(res => {
       this.cards = res[this._engine.playerIndex].cards;
     });
+  }
+
+  ngOnInit() {
     const time = merge(
       timer(30000).pipe(
         map(res => {
@@ -74,9 +77,6 @@ export class MainPlayerComponent implements OnInit {
           this._engine.autoMove.next(true);
         }
       );
-  }
-
-  ngOnInit() {
     if (this._engine.turn) {
       this._engine.myTurn.next(true);
     }

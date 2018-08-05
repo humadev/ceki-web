@@ -1,9 +1,8 @@
+import { GameEngineService } from './game-engine.service';
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { AngularFireAuthModule } from 'angularfire2/auth';
 import { AuthService } from './auth.service';
-import { AngularFireModule } from 'angularfire2';
-import { environment } from '../../environments/environment';
+
 import {
   MatToolbarModule,
   MatButtonModule,
@@ -15,12 +14,11 @@ import {
   MatDialogModule,
   MatProgressBarModule
 } from '@angular/material';
+import { WebrtcService } from './webrtc.service';
 
 @NgModule({
   imports: [
     CommonModule,
-    AngularFireAuthModule,
-    AngularFireModule.initializeApp(environment.firebase),
     MatToolbarModule,
     MatButtonModule,
     MatSidenavModule,
@@ -40,11 +38,9 @@ import {
     MatTabsModule,
     MatCardModule,
     MatDialogModule,
-    AngularFireModule,
-    AngularFireAuthModule,
     MatProgressBarModule
   ],
   declarations: [],
-  providers: [AuthService]
+  providers: [AuthService, GameEngineService, WebrtcService]
 })
 export class SharedModule {}

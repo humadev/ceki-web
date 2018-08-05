@@ -1,35 +1,45 @@
 import { Injectable } from '@angular/core';
 import * as Peer from 'peerjs';
 import { Subject } from 'rxjs';
+import { AuthService } from './auth.service';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable()
 export class WebrtcService {
   peer;
   connections = [];
   temp;
   $message = new Subject();
+  $init = new Subject();
+
+  constructor(private auth: AuthService) {
+    this.auth.afAuth.authState.subscribe(user => {
+      console.log(!this.peer);
+      if (user && !this.peer) {
+        this.open(user.uid);
+      }
+    });
+  }
 
   open(id) {
-    this.peer = new Peer(id, {
-      host: 'localhost',
-      port: 3000,
-      path: '/webrtc/',
-      secure: false
-    });
-    this.peer.on('connection', conn => this.onConnectionPeer(conn));
-    this.peer.on('open', ids => this.onOpenPeer(ids));
-    this.peer.on('error', err => this.onErrorPeer(err));
+    if (!this.peer) {
+      console.log('create peer');
+      this.peer = new Peer(id, {
+        host: '188.166.250.103',
+        port: 3000,
+        path: '/webrtc/',
+        secure: false
+      });
+      this.peer.on('connection', conn => this.onConnectionPeer(conn));
+      this.peer.on('open', ids => this.onOpenPeer(ids));
+      this.peer.on('error', err => this.onErrorPeer(err));
+    }
   }
 
   connecting(id) {
     const connect = this.peer.connect(
       id,
       {
-        label: 'room',
-        serialization: 'json',
-        metadata: { message: 'hi i want to play with you!' }
+        serialization: 'json'
       }
     );
 
@@ -37,35 +47,37 @@ export class WebrtcService {
   }
 
   private onOpenPeer(id) {
-    console.log('your ID', id);
+    this.$init.next(true);
+    console.log('your peer ID: ', id);
   }
 
   onConnectionPeer(conn) {
-    console.log('you have connection peer', conn.peer);
+    console.log('you have connection peer from: ', conn.peer);
     conn.open = true;
-    conn.on('data', data => this.onDataConnection(data));
+    conn.on('data', data => this.onDataConnection(data, conn.peer));
     conn.on('close', () => this.onCloseConnection(conn.peer));
     conn.on('error', err => this.onErrorConnection(err));
   }
 
-  onDataConnection(data) {
+  onDataConnection(data, peer) {
+    console.log('received data from peer: ', peer);
     this.$message.next(data);
-    console.log('received data ', data);
   }
 
   onCloseConnection(peer) {
-    console.log('close connection from ', peer);
+    console.log('close connection from peer: ', peer);
     delete this.connections[peer];
   }
 
   sendAll(msg) {
     this.connections.forEach(conn => {
+      console.log('send data to peer: ', conn.peer);
       conn.send(msg);
     });
   }
 
   private onErrorPeer(err) {
-    console.log('Error peer', err);
+    console.log('Error peer ', err);
   }
 
   private onErrorConnection(err) {
