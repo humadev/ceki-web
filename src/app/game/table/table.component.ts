@@ -9,7 +9,7 @@ import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 export class TableComponent implements OnInit {
   playerIndex = 0;
   logs = [];
-  benchmark = true;
+  benchmark = false;
   players: number;
 
   constructor(public _engine: GameEngineService) {

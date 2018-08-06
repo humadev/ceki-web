@@ -1,3 +1,4 @@
+import { environment } from './../../environments/environment';
 import { Injectable } from '@angular/core';
 import * as Peer from 'peerjs';
 import { Subject } from 'rxjs';
@@ -21,8 +22,8 @@ export class WebrtcService {
     if (!this.peer) {
       console.log('create peer');
       this.peer = new Peer(id, {
-        host: '188.166.250.103',
-        port: 3000,
+        host: environment.endpoint,
+        port: environment.port,
         path: '/webrtc/',
         secure: false
       });

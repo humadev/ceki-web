@@ -1,13 +1,26 @@
 .root {
-  background-color: green;
+  background-image: url('../../../assets/bg-blur.jpg');
+  background-size: cover;
   width: 100vw;
   height: 100vh;
   text-align: center;
+  padding-top: 100px;
 }
 
-h1 {
-  color: #dedede;
-  margin: 20px;
-  font-size: 80px;
-  font-family: 'Roboto', sans-serif;
+.login-button{
+    margin-bottom: 20px;
+}
+
+.logo{
+    height: 200px;
+    margin-bottom: 50px;
+}
+
+button {
+    width: 200px;
+    padding: 10px 20px;
+    img {
+    vertical-align: middle;
+    width: 25px;
+    }
 }

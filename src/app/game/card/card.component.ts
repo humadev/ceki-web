@@ -8,7 +8,7 @@ import { of } from 'rxjs';
 })
 export class CardComponent implements OnInit {
   @Input() class = ['portrait', 'open', 'main'];
-  @Input() cardNumber: number;
+  @Input() card: any;
   background: any;
   @Input() rotate;
   @Input() overview = false;
@@ -16,9 +16,9 @@ export class CardComponent implements OnInit {
   constructor() {}
 
   ngOnInit() {
-    if (this.cardNumber) {
+    if (this.card) {
       this.background = {
-        'background-image': `url(/assets/cards/ceki${this.cardNumber}.png)`
+          'background-image': `url(/assets/cards/ceki-${this.card.soroh}-${this.card.no}.png)`
       };
     }
     if (this.rotate) {

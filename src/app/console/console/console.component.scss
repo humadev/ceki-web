@@ -6,6 +6,7 @@
   .header {
     display: block;
     .welcoming {
+        float: right;
       display: inline-block;
       color: whitesmoke;
       font-family: 'Source Sans Pro', sans-serif;
@@ -26,7 +27,7 @@
       color: #abdfab;
       font-family: 'Source Sans Pro', sans-serif;
       padding: 20px;
-      width: 45%;
+      width: 100px;
     }
   }
   .content {

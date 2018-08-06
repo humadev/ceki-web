@@ -1,3 +1,4 @@
+import { environment } from './../../environments/environment';
 import { Subject } from 'rxjs';
 import { WebsocketService } from './websocket.service';
 import { Injectable } from '@angular/core';
@@ -162,7 +163,7 @@ export class GameEngineService {
       };
       this._rtc.sendAll(moveData);
       this.http
-        .post('http://188.166.250.103:3000/record', moveData)
+          .post(`http://${environment.endpoint}:environment.port/record`, moveData)
         .subscribe(res => console.log('record in server'));
     }
   }

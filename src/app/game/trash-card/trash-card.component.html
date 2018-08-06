@@ -1,1 +1,1 @@
-<ceki-card [class]='class' *ngFor="let card of cards" [cardNumber]='card' [rotate]='rotate' [overview]='overview'></ceki-card>
+<ceki-card [class]='class' *ngFor="let card of cards;let i=index" [card]='card' [rotate]='rotate' [overview]='overview' draggable="cards.length === i+1? true: false"></ceki-card>
