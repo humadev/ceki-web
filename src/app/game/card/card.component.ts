@@ -7,18 +7,32 @@ import { of } from 'rxjs';
   styleUrls: ['./card.component.scss']
 })
 export class CardComponent implements OnInit {
-  @Input() class = ['portrait', 'open', 'main'];
-  @Input() card: any;
+  @Input()
+  class = ['portrait', 'open', 'main'];
+  @Input()
+  card: any;
   background: any;
-  @Input() rotate;
-  @Input() overview = false;
+  @Input()
+  rotate;
+  @Input()
+  overview = false;
+  @Input()
+  index;
+  @Input()
+  type;
+  @Input()
+  isDraggable = false;
+  @Input()
+  dragScope;
 
   constructor() {}
 
   ngOnInit() {
-    if (this.card) {
+    if (this.type === 'main' || this.type === 'trash') {
       this.background = {
-          'background-image': `url(/assets/cards/ceki-${this.card.soroh}-${this.card.no}.png)`
+        'background-image': `url(/assets/cards/ceki-${this.card.soroh}-${
+          this.card.no
+        }.png)`
       };
     }
     if (this.rotate) {

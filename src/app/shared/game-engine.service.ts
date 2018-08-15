@@ -1,3 +1,4 @@
+import { AngularFireAuth } from 'angularfire2/auth';
 import { environment } from './../../environments/environment';
 import { Subject } from 'rxjs';
 import { WebsocketService } from './websocket.service';
@@ -36,7 +37,8 @@ export class GameEngineService {
     private _ws: WebsocketService,
     private router: Router,
     private http: HttpClient,
-    private auth: AuthService
+    private auth: AuthService,
+    private afAuth: AngularFireAuth
   ) {
     this._ws.socket.on('rejoin room', data => {
       this.gameLogs.next(
@@ -45,13 +47,16 @@ export class GameEngineService {
       this.playersManifest = data.gameState.players;
       this.dealersCards = data.gameState.dealers;
       this.gamePlay.next(data.gameState.players);
-      this._rtc.$init.subscribe(res => {
-        this.playersManifest.forEach((player: any) => {
-          if (player.uid !== this.auth.users.uid) {
-            console.log('trying connecting to peer: ', player.uid);
-            this._rtc.connecting(player.uid);
-          }
-        });
+      if (typeof this._rtc.ID !== 'undefined' && this._rtc.ID !== data.peer) {
+        console.log('balas koneksi', this._rtc.ID, data.peer);
+        this._rtc.connecting(data.peer);
+      }
+      this.playersManifest.forEach((player: any) => {
+        if (player.uid !== this.auth.users.uid) {
+          console.log(player.uid, this.auth.users.uid);
+          console.log('trying connecting to peer: ', player.uid);
+          this._rtc.connecting(player.uid);
+        }
       });
       this.turn = data.gameState.players[this.playerIndex].turn;
       this.pick = data.gameState.players[this.playerIndex].pick;
@@ -62,16 +67,21 @@ export class GameEngineService {
       }
     });
 
-    if (this.init === false) {
-      const gameState = JSON.parse(localStorage.getItem('gs'));
-      if (gameState) {
-        this.roomID = gameState.rid;
-        this.init = true;
-        this.players = gameState.p;
-        this.playerIndex = gameState.pi;
-        this._ws.socket.emit('rejoin room', { roomID: this.roomID });
+    afAuth.user.subscribe(user => {
+      if (this.init === false) {
+        const gameState = JSON.parse(localStorage.getItem('gs'));
+        if (gameState) {
+          this.roomID = gameState.rid;
+          this.init = true;
+          this.players = gameState.p;
+          this.playerIndex = gameState.pi;
+          this._ws.socket.emit('rejoin room', {
+            roomID: this.roomID,
+            peer: user.uid
+          });
+        }
       }
-    }
+    });
 
     this._ws.socket.on('play', data => {
       data.players.forEach(player => {
@@ -139,7 +149,14 @@ export class GameEngineService {
   dropInMain(e) {
     if (this.pick === 1) {
       this.playersManifest[this.playerIndex].cards.push(e.dragData.value);
-      this.dealersCards.splice(e.dragData.index, 1);
+      if (e.type === 'dealer') {
+        this.dealersCards.splice(e.dragData.index, 1);
+      } else {
+        this.playersManifest[this.whosBefore()].trash.splice(
+          e.dragData.index,
+          1
+        );
+      }
       this.pick = 0;
       if (this.pick === 0 && this.throw === 0) {
         this.turn = false;
@@ -161,10 +178,17 @@ export class GameEngineService {
         throw: this.throw,
         date: dateMove.getTime()
       };
+      console.log(this._rtc.connections);
       this._rtc.sendAll(moveData);
       this.http
-          .post(`http://${environment.endpoint}:environment.port/record`, moveData)
-        .subscribe(res => console.log('record in server'));
+        .post(
+          `http://${environment.endpoint}:${environment.port}/record`,
+          moveData
+        )
+        .subscribe(
+          res => console.log('record in server'),
+          err => console.log('error recording')
+        );
     }
   }
 
@@ -195,7 +219,10 @@ export class GameEngineService {
       };
       this._rtc.sendAll(moveData);
       this.http
-        .post('http://188.166.250.103:3000/record', moveData)
+        .post(
+          `http://${environment.endpoint}:${environment.port}/record`,
+          moveData
+        )
         .subscribe(res => console.log('record in server'));
     }
   }
@@ -249,7 +276,10 @@ export class GameEngineService {
     };
     this._rtc.sendAll(moveData);
     this.http
-      .post('http://188.166.250.103:3000/record', moveData)
+      .post(
+        `http://${environment.endpoint}:${environment.port}/record`,
+        moveData
+      )
       .subscribe(res => console.log('record in server'));
   }
 
@@ -257,6 +287,14 @@ export class GameEngineService {
     let obsIndex = index + 1;
     if (obsIndex > this.players - 1) {
       obsIndex -= this.players;
+    }
+    return obsIndex;
+  }
+
+  whosBefore() {
+    let obsIndex = this.playerIndex - 1;
+    if (obsIndex < 0) {
+      obsIndex = this.players - 1;
     }
     return obsIndex;
   }

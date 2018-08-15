@@ -1,8 +1,7 @@
 import { environment } from './../../environments/environment';
-import { Injectable } from '@angular/core';
+import { Injectable, NgZone } from '@angular/core';
 import * as Peer from 'peerjs';
 import { Subject } from 'rxjs';
-import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root'
@@ -13,14 +12,14 @@ export class WebrtcService {
   temp;
   $message = new Subject();
   $init = new Subject();
+  ID;
 
-  constructor(private auth: AuthService) {
+  constructor(private zone: NgZone) {
     console.log('webrtc constructor');
   }
 
   open(id) {
-    if (!this.peer) {
-      console.log('create peer');
+    if (typeof this.peer === 'undefined') {
       this.peer = new Peer(id, {
         host: environment.endpoint,
         port: environment.port,
@@ -34,18 +33,28 @@ export class WebrtcService {
   }
 
   connecting(id) {
-    const connect = this.peer.connect(
-      id,
-      {
-        serialization: 'json'
-      }
-    );
+    const checking = this.connections.filter(obj => {
+      return obj.id === id;
+    });
+    if (checking.length === 0) {
+      console.log('open connection with ' + id);
+      const connect = this.peer.connect(
+        id,
+        {
+          serialization: 'json'
+        }
+      );
 
-    this.connections.push(connect);
+      this.connections.push({
+        id: id,
+        client: connect
+      });
+    }
   }
 
   private onOpenPeer(id) {
     this.$init.next(true);
+    this.ID = id;
     console.log('your peer ID: ', id);
   }
 
@@ -59,18 +68,25 @@ export class WebrtcService {
 
   onDataConnection(data, peer) {
     console.log('received data from peer: ', peer);
-    this.$message.next(data);
+    this.zone.run(() => {
+      this.$message.next(data);
+    });
   }
 
   onCloseConnection(peer) {
     console.log('close connection from peer: ', peer);
-    delete this.connections[peer];
+
+    if (this.connections.length > 0) {
+      this.connections = this.connections.filter(obj => {
+        return obj.id !== peer;
+      });
+    }
   }
 
   sendAll(msg) {
     this.connections.forEach(conn => {
-      console.log('send data to peer: ', conn.peer);
-      conn.send(msg);
+      console.log('send data to peer: ', conn.client.peer);
+      conn.client.send(msg);
     });
   }
 

@@ -28,7 +28,6 @@ export class PlayRoomComponent implements OnDestroy {
   }
 
   createRoom() {
-    this._rtc.open(this._auth.users.uid);
     this.$createRoom = this._dialog.open(RoomComponent, {
       height: '500px',
       width: '800px'
@@ -36,7 +35,6 @@ export class PlayRoomComponent implements OnDestroy {
   }
 
   joinRoom() {
-    this._rtc.open(this._auth.users.uid);
     this.$joinRoom = this._dialog.open(JoinRoomComponent, {
       data: {
         roomID: this.room

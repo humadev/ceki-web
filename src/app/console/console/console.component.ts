@@ -1,3 +1,4 @@
+import { WebrtcService } from 'src/app/shared/webrtc.service';
 import { Component } from '@angular/core';
 import {
   BreakpointObserver,
@@ -22,7 +23,8 @@ export class ConsoleComponent {
 
   constructor(
     private breakpointObserver: BreakpointObserver,
-    private auth: AuthService
+    private auth: AuthService,
+    public rtc: WebrtcService
   ) {
     this.auth.afAuth.authState.subscribe(res => {
       if (this.auth.afAuth.auth.currentUser) {

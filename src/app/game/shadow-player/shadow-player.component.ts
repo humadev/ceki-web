@@ -8,11 +8,15 @@ import { Component, OnInit, Input } from '@angular/core';
 })
 export class ShadowPlayerComponent implements OnInit {
   class;
-  @Input() landscape = false;
+  @Input()
+  landscape = false;
   set;
-  @Input() align = 'center';
-  @Input() cards = [];
-  @Input() player: number;
+  @Input()
+  align = 'center';
+  @Input()
+  cards = [];
+  @Input()
+  player: number;
 
   constructor(private _engine: GameEngineService) {
     // this.cards = this._engine.playersManifest[this.player].cards;

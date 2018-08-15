@@ -1,1 +1,3 @@
-<div class="card" [ngClass]="class" [ngStyle]="background" draggable="true"></div>
+<div class="card" [ngClass]="class" [ngStyle]="background" draggable [dragEnabled]="isDraggable" [dragData]="{index: index, value: card, type: type}"
+  [dragScope]='dragScope'>
+</div>
