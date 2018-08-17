@@ -1,12 +1,13 @@
 import { AngularFireAuth } from 'angularfire2/auth';
 import { environment } from './../../environments/environment';
-import { Subject } from 'rxjs';
+import { Subject, from } from 'rxjs';
 import { WebsocketService } from './websocket.service';
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { WebrtcService } from './webrtc.service';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from './auth.service';
+import { groupBy, mergeMap, toArray } from 'rxjs/operators';
 
 @Injectable()
 export class GameEngineService {
@@ -31,6 +32,9 @@ export class GameEngineService {
   pick = 0;
   throw = 0;
   init = false;
+  soca = [];
+  lawang = [];
+  serigat = [];
 
   constructor(
     private _rtc: WebrtcService,
@@ -166,6 +170,8 @@ export class GameEngineService {
       this.gameLogs.next(
         `broadcast koneksi webrtc saat kartu pindah ke pemain`
       );
+      this.isMecari(this.playersManifest[this.playerIndex].cards);
+      this.isNyaga(this.playersManifest[this.playerIndex].cards);
       const moveData = {
         card: this.playersManifest[this.playerIndex].cards,
         trash: this.playersManifest[this.playerIndex].trash,
@@ -247,19 +253,24 @@ export class GameEngineService {
     ];
 
     // drop to trash
-    this.throw = 0;
-    this.playersManifest[this.playerIndex].trash.push(cardToTrash);
-    this.playersManifest[this.playerIndex].cards.splice(
-      this.playersManifest[this.playerIndex].cards.length - 1,
-      1
-    );
+    if (this.throw === 1) {
+      this.throw = 0;
+      this.playersManifest[this.playerIndex].trash.push(cardToTrash);
+      this.playersManifest[this.playerIndex].cards.splice(
+        this.playersManifest[this.playerIndex].cards.length - 1,
+        1
+      );
+    }
 
     this.gameLogs.next(`broadcast koneksi webrtc saat waktu habis`);
 
     // drop to main
-    this.playersManifest[this.playerIndex].cards.push(cardToMain);
-    this.dealersCards.splice(0, 1);
-    this.pick = 0;
+    if (this.pick === 1) {
+      this.playersManifest[this.playerIndex].cards.push(cardToMain);
+      this.dealersCards.splice(this.dealersCards.length - 1, 1);
+      this.pick = 0;
+    }
+
     this.turn = false;
     const dateMove = new Date();
     const moveData = {
@@ -297,5 +308,61 @@ export class GameEngineService {
       obsIndex = this.players - 1;
     }
     return obsIndex;
+  }
+
+  isMecari(cards) {
+    // kondisi sauca 1, serigat 2, lawang 1(menang ketika kartu
+    // dari lawang menjadi sauca, mencari 1 kartu yang sama persis dengan lawang
+    // , baik dibuka oleh pemain atau lawan, jika dibuka sendiri dinamakan ngandang, jika dibuka lawan ngenen
+    this.getSocaLawang(cards);
+    this.getSerigat(cards);
+  }
+
+  isNyaga(cards) {
+    // posisi nyaga, siap menang, kondisi sauca 2, serigat 1, lawang 1 /
+    // serigat tp 2 kartu(lawang 1 = menang saat kondisi musuh membuka klan dari lawang disebut ngenen,
+    // dan saat membuka sendiri disebut ngandang ketika kartu sama persis, serigat 2 kartu = dan
+    // membuka kartu 1 klan menjadi ngenen)
+    this.getSocaLawang(cards);
+    this.getSerigat(cards);
+  }
+
+  // rule priority soca, serigat, lawang
+
+  getSocaLawang(cards) {
+    from(cards)
+      .pipe(
+        groupBy((card: any) => card.no),
+        mergeMap(group => group.pipe(toArray()))
+      )
+      .subscribe(res => {
+        const soca = [];
+        const lawang = [];
+        if (res.length === 3) {
+          console.log('soca =>', res[0].no, ' => ', res);
+          soca.push(res);
+        } else if (res.length === 2) {
+          console.log('lawang =>', res[0].no, ' => ', res);
+          lawang.push(res);
+        }
+        this.soca = soca;
+        this.lawang = lawang;
+      });
+  }
+
+  getSerigat(cards) {
+    from(cards)
+      .pipe(
+        groupBy((card: any) => card.soroh),
+        mergeMap(group => group.pipe(toArray()))
+      )
+      .subscribe(res => {
+        const serigat = [];
+        if (res.length === 3) {
+          console.log('serigat =>', res[0].no, ' => ', res);
+          serigat.push(res);
+        }
+        this.serigat = serigat;
+      });
   }
 }

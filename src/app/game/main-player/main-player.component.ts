@@ -24,6 +24,7 @@ export class MainPlayerComponent implements OnInit {
   turnTime = 0;
   startTimer: Observable<any>;
   myTurn = false;
+  message;
 
   constructor(
     private _engine: GameEngineService,
