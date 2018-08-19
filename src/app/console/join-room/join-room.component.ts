@@ -26,6 +26,7 @@ export class JoinRoomComponent implements OnInit {
       this.players = data;
     });
     this._ws.socket.on('join room', data => {
+      console.log('join as', data.index);
       this._engine.playerIndex = data.index;
     });
     this._ws.socket.emit('join room', {

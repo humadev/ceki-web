@@ -20,11 +20,16 @@ import {
   styleUrls: ['./main-player.component.scss']
 })
 export class MainPlayerComponent implements OnInit {
-  @Input() cards = [];
+  @Input()
+  cards = [];
   turnTime = 0;
   startTimer: Observable<any>;
   myTurn = false;
   message;
+  soca = 0;
+  serigat = 0;
+  lawang = 0;
+  benchmark: boolean;
 
   constructor(
     private _engine: GameEngineService,
@@ -33,12 +38,23 @@ export class MainPlayerComponent implements OnInit {
     // this.cards = this._engine.playersManifest[this._engine.playerIndex].cards;
     this._engine.gamePlay.subscribe(res => {
       this.cards = res[this._engine.playerIndex].cards;
+      this.soca = this._engine.soca.length;
+      this.serigat = this._engine.serigat.length;
+      this.lawang = this._engine.lawang.length;
     });
   }
 
   ngOnInit() {
+    this._engine.benchmark.subscribe(b => {
+      this.benchmark = b;
+    });
+    this._engine.status.subscribe(status => {
+      this.soca = this._engine.soca.length;
+      this.serigat = this._engine.serigat.length;
+      this.lawang = this._engine.lawang.length;
+    });
     const time = merge(
-      timer(30000).pipe(
+      timer(60000).pipe(
         map(res => {
           this.myTurn = false;
           this.turnTime = 0;
@@ -56,7 +72,7 @@ export class MainPlayerComponent implements OnInit {
     this.startTimer = interval(10).pipe(
       map(x => x + 1), // to start from 1 instead of 0
       map(x => {
-        this.turnTime = (x / 3000) * 100;
+        this.turnTime = (x / 6000) * 100;
       }), // do some logic here
       takeUntil(time)
     );

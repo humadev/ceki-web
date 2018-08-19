@@ -21,14 +21,15 @@ export class TrashCardComponent implements OnInit {
 
   constructor(private _engine: GameEngineService, private _dialog: MatDialog) {
     // this.cards = this._engine.playersManifest[this.player].trash;
+  }
+
+  ngOnInit() {
     this._engine.gamePlay.subscribe(res => {
-      if (res[this.player]) {
-        this.cards = res[this.player].trash;
+      if (this._engine.playersManifest[this.player]) {
+        this.cards = this._engine.playersManifest[this.player].trash;
       }
     });
   }
-
-  ngOnInit() {}
 
   randomRotate() {
     let num = Math.floor(Math.random() * 90); // this will get a number between 1 and 99;

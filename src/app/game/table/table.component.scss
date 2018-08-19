@@ -13,14 +13,14 @@ div {
 .benchmark {
   position: fixed;
   top: 0;
-  right: 0;
+  left: 0;
   background: black;
   color: white;
   opacity: 0.5;
   filter: alpha(opacity=50);
   z-index: 2000;
   width: 400px;
-  height: 400px;
+  height: 300px;
   padding: 5px;
   overflow: scroll;
   overflow-x: hidden;
@@ -43,6 +43,6 @@ div {
   }
 }
 
-.drag-border{
-    width: 70px;
+.drag-border {
+  width: 70px;
 }

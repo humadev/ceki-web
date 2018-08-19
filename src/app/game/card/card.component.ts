@@ -1,3 +1,4 @@
+import { GameEngineService } from './../../shared/game-engine.service';
 import { Component, OnInit, Input } from '@angular/core';
 import { of } from 'rxjs';
 
@@ -24,8 +25,9 @@ export class CardComponent implements OnInit {
   isDraggable = false;
   @Input()
   dragScope;
+  benchmark = false;
 
-  constructor() {}
+  constructor(private _engine: GameEngineService) {}
 
   ngOnInit() {
     if (this.type === 'main' || this.type === 'trash') {
@@ -39,13 +41,9 @@ export class CardComponent implements OnInit {
       this.background.transform = `rotate(${this.randomRotate()}deg)`;
     }
 
-    // of(this.overview).subscribe(res => {
-    //   if (res) {
-    //     this.background.transform = `rotate(0deg)`;
-    //   } else if (this.rotate) {
-    //     // this.background.transform = `rotate(${this.randomRotate()}deg)`;
-    //   }
-    // });
+    this._engine.benchmark.subscribe(b => {
+      this.benchmark = b;
+    });
   }
 
   randomRotate() {

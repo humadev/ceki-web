@@ -1,13 +1,20 @@
 import { AngularFireAuth } from 'angularfire2/auth';
 import { environment } from './../../environments/environment';
-import { Subject, from } from 'rxjs';
+import { Subject, BehaviorSubject } from 'rxjs';
 import { WebsocketService } from './websocket.service';
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { WebrtcService } from './webrtc.service';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from './auth.service';
-import { groupBy, mergeMap, toArray } from 'rxjs/operators';
+import {
+  each,
+  groupBy,
+  partition,
+  flattenDeep,
+  chunk,
+  concat
+} from 'lodash-es';
 
 @Injectable()
 export class GameEngineService {
@@ -15,6 +22,8 @@ export class GameEngineService {
 
   playingCards = [];
   playersManifest = [];
+
+  benchmark = new BehaviorSubject(true);
 
   gamePlay = new Subject();
   gameLogs = new Subject();
@@ -27,7 +36,7 @@ export class GameEngineService {
   roomID;
   initiator = false;
   messages: Subject<any>;
-  playerIndex = 0;
+  playerIndex;
   turn = false;
   pick = 0;
   throw = 0;
@@ -35,6 +44,7 @@ export class GameEngineService {
   soca = [];
   lawang = [];
   serigat = [];
+  status = new BehaviorSubject('');
 
   constructor(
     private _rtc: WebrtcService,
@@ -65,6 +75,10 @@ export class GameEngineService {
       this.turn = data.gameState.players[this.playerIndex].turn;
       this.pick = data.gameState.players[this.playerIndex].pick;
       this.throw = data.gameState.players[this.playerIndex].throw;
+      this.soca = data.gameState.players[this.playerIndex].soca;
+      this.serigat = data.gameState.players[this.playerIndex].serigat;
+      this.lawang = data.gameState.players[this.playerIndex].lawang;
+      this.status.next(data.gameState.players[this.playerIndex].status);
       if (this.turn) {
         this.gameLogs.next(`pemain mendapatkan giliran`);
         this.myTurn.next(true);
@@ -88,6 +102,7 @@ export class GameEngineService {
     });
 
     this._ws.socket.on('play', data => {
+      console.log(data);
       data.players.forEach(player => {
         if (player.uid !== this.auth.users.uid) {
           console.log('trying connecting to peer: ', player.uid);
@@ -125,6 +140,12 @@ export class GameEngineService {
       );
       this.playersManifest[data.index].cards = data.card;
       this.playersManifest[data.index].trash = data.trash;
+      if (data.otherTrash) {
+        this.playersManifest[data.otherTrash.index].trash.splice(
+          data.otherTrash.trash,
+          1
+        );
+      }
       this.dealersCards = data.dealers;
       this.gamePlay.next(this.playersManifest);
       if (data.turning && this.itsMyIndex(data.index)) {
@@ -153,7 +174,7 @@ export class GameEngineService {
   dropInMain(e) {
     if (this.pick === 1) {
       this.playersManifest[this.playerIndex].cards.push(e.dragData.value);
-      if (e.type === 'dealer') {
+      if (e.dragData.type === 'dealer') {
         this.dealersCards.splice(e.dragData.index, 1);
       } else {
         this.playersManifest[this.whosBefore()].trash.splice(
@@ -165,16 +186,21 @@ export class GameEngineService {
       if (this.pick === 0 && this.throw === 0) {
         this.turn = false;
         this.myTurn.next(false);
+        this.isMecari(this.playersManifest[this.playerIndex].cards);
+        this.isNyaga(this.playersManifest[this.playerIndex].cards);
       }
       const dateMove = new Date();
       this.gameLogs.next(
         `broadcast koneksi webrtc saat kartu pindah ke pemain`
       );
-      this.isMecari(this.playersManifest[this.playerIndex].cards);
-      this.isNyaga(this.playersManifest[this.playerIndex].cards);
+
       const moveData = {
         card: this.playersManifest[this.playerIndex].cards,
         trash: this.playersManifest[this.playerIndex].trash,
+        otherTrash: {
+          index: this.whosBefore(),
+          trash: e.dragData.index
+        },
         index: this.playerIndex,
         roomID: this.roomID,
         dealers: this.dealersCards,
@@ -182,9 +208,12 @@ export class GameEngineService {
         turnIndex: this.whosTurn(this.playerIndex),
         pick: this.pick,
         throw: this.throw,
-        date: dateMove.getTime()
+        date: dateMove.getTime(),
+        soca: this.soca,
+        serigat: this.serigat,
+        lawang: this.lawang,
+        status: this.status.value
       };
-      console.log(this._rtc.connections);
       this._rtc.sendAll(moveData);
       this.http
         .post(
@@ -204,6 +233,8 @@ export class GameEngineService {
       if (this.pick === 0 && this.throw === 0) {
         this.turn = false;
         this.myTurn.next(false);
+        this.isMecari(this.playersManifest[this.playerIndex].cards);
+        this.isNyaga(this.playersManifest[this.playerIndex].cards);
       }
       this.playersManifest[this.playerIndex].trash.push(e.dragData.value);
       this.playersManifest[this.playerIndex].cards.splice(e.dragData.index, 1);
@@ -211,6 +242,8 @@ export class GameEngineService {
       this.gameLogs.next(
         `broadcast koneksi webrtc saat kartu pindah ke pembuangan`
       );
+      this.isMecari(this.playersManifest[this.playerIndex].cards);
+      this.isNyaga(this.playersManifest[this.playerIndex].cards);
       const moveData = {
         card: this.playersManifest[this.playerIndex].cards,
         trash: this.playersManifest[this.playerIndex].trash,
@@ -221,8 +254,13 @@ export class GameEngineService {
         turnIndex: this.whosTurn(this.playerIndex),
         pick: this.pick,
         throw: this.throw,
-        date: dateMove.getTime()
+        date: dateMove.getTime(),
+        soca: this.soca,
+        serigat: this.serigat,
+        lawang: this.lawang,
+        status: this.status.value
       };
+
       this._rtc.sendAll(moveData);
       this.http
         .post(
@@ -247,7 +285,7 @@ export class GameEngineService {
 
   autoMoveCard() {
     console.log('automove');
-    const cardToMain = this.dealersCards[0];
+    const cardToMain = this.dealersCards[this.dealersCards.length - 1];
     const cardToTrash = this.playersManifest[this.playerIndex].cards[
       this.playersManifest[this.playerIndex].cards.length - 1
     ];
@@ -271,6 +309,9 @@ export class GameEngineService {
       this.pick = 0;
     }
 
+    this.isMecari(this.playersManifest[this.playerIndex].cards);
+    this.isNyaga(this.playersManifest[this.playerIndex].cards);
+
     this.turn = false;
     const dateMove = new Date();
     const moveData = {
@@ -283,7 +324,11 @@ export class GameEngineService {
       turnIndex: this.whosTurn(this.playerIndex),
       pick: this.pick,
       throw: this.throw,
-      date: dateMove.getTime()
+      date: dateMove.getTime(),
+      soca: this.soca,
+      serigat: this.serigat,
+      lawang: this.lawang,
+      status: this.status.value
     };
     this._rtc.sendAll(moveData);
     this.http
@@ -311,11 +356,26 @@ export class GameEngineService {
   }
 
   isMecari(cards) {
-    // kondisi sauca 1, serigat 2, lawang 1(menang ketika kartu
+    // kondisi soca 1, serigat 2, lawang 1(menang ketika kartu
     // dari lawang menjadi sauca, mencari 1 kartu yang sama persis dengan lawang
     // , baik dibuka oleh pemain atau lawan, jika dibuka sendiri dinamakan ngandang, jika dibuka lawan ngenen
-    this.getSocaLawang(cards);
-    this.getSerigat(cards);
+
+    const sisaSoca = this.putSoca(cards);
+    const sisaSerigat = this.putSerigat(sisaSoca);
+    const sisaLawang = this.putLawang(sisaSerigat);
+    if (
+      this.soca.length === 1 &&
+      this.serigat.length === 2 &&
+      this.lawang.length === 1
+    ) {
+      alert('mecari');
+      this.status.next('mecari');
+    }
+    console.log({
+      soca: this.soca,
+      serigat: this.serigat,
+      lawang: this.lawang
+    });
   }
 
   isNyaga(cards) {
@@ -323,46 +383,91 @@ export class GameEngineService {
     // serigat tp 2 kartu(lawang 1 = menang saat kondisi musuh membuka klan dari lawang disebut ngenen,
     // dan saat membuka sendiri disebut ngandang ketika kartu sama persis, serigat 2 kartu = dan
     // membuka kartu 1 klan menjadi ngenen)
-    this.getSocaLawang(cards);
-    this.getSerigat(cards);
+    if (
+      (this.soca.length === 3 && this.lawang.length === 1) ||
+      (this.soca.length === 2 &&
+        this.serigat.length === 1 &&
+        this.lawang.length === 1)
+    ) {
+      alert('nyaga');
+      this.status.next('nyaga');
+    } else {
+      this.status.next('');
+    }
   }
 
   // rule priority soca, serigat, lawang
 
-  getSocaLawang(cards) {
-    from(cards)
-      .pipe(
-        groupBy((card: any) => card.no),
-        mergeMap(group => group.pipe(toArray()))
-      )
-      .subscribe(res => {
-        const soca = [];
-        const lawang = [];
-        if (res.length === 3) {
-          console.log('soca =>', res[0].no, ' => ', res);
-          soca.push(res);
-        } else if (res.length === 2) {
-          console.log('lawang =>', res[0].no, ' => ', res);
-          lawang.push(res);
-        }
-        this.soca = soca;
-        this.lawang = lawang;
-      });
+  putSoca(cards) {
+    const groupNo = groupBy(cards, 'no');
+    const partSoca = partition(groupNo, n => {
+      if (n.length >= 3) {
+        return true;
+      } else {
+        return false;
+      }
+    });
+    let chunkTo3 = [];
+    each(partSoca[0], (row, key) => {
+      if (row.length > 3) {
+        const chunks = chunk(row, 3);
+        chunkTo3 = concat(chunkTo3, chunks);
+      } else {
+        chunkTo3.push(row);
+      }
+    });
+    const finalSoca = [];
+    each(chunkTo3, (row, key) => {
+      if (row.length === 3) {
+        finalSoca.push(row);
+      } else {
+        partSoca[1].push(row);
+      }
+    });
+    this.soca = finalSoca;
+    return flattenDeep(partSoca[1]);
   }
 
-  getSerigat(cards) {
-    from(cards)
-      .pipe(
-        groupBy((card: any) => card.soroh),
-        mergeMap(group => group.pipe(toArray()))
-      )
-      .subscribe(res => {
-        const serigat = [];
-        if (res.length === 3) {
-          console.log('serigat =>', res[0].no, ' => ', res);
-          serigat.push(res);
-        }
-        this.serigat = serigat;
-      });
+  putSerigat(cards) {
+    const groupSoroh = groupBy(cards, 'soroh');
+    const partSerigat = partition(groupSoroh, n => {
+      if (n.length >= 3) {
+        return true;
+      } else {
+        return false;
+      }
+    });
+    let chunkTo3 = [];
+    each(partSerigat[0], (row, key) => {
+      if (row.length > 3) {
+        const chunks = chunk(row, 3);
+        chunkTo3 = concat(chunkTo3, chunks);
+      } else {
+        chunkTo3.push(row);
+      }
+    });
+    const finalSerigat = [];
+    each(chunkTo3, (row, key) => {
+      if (row.length === 3) {
+        finalSerigat.push(row);
+      } else {
+        partSerigat[1].push(row);
+      }
+    });
+    this.serigat = finalSerigat;
+    return flattenDeep(partSerigat[1]);
+  }
+
+  putLawang(cards) {
+    const groupLawang = groupBy(cards, 'no');
+    const partLawang = partition(groupLawang, n => {
+      if (n.length >= 2) {
+        return true;
+      } else {
+        return false;
+      }
+    });
+    this.lawang = partLawang[0];
+    return flattenDeep(partLawang[1]);
   }
 }
