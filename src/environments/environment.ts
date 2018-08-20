@@ -4,7 +4,7 @@
 
 export const environment = {
   production: false,
-  websocket: 'ws://128.199.196.171:4000',
+  websocket: 'ws://localhost:3000',
   endpoint: 'localhost',
   port: 3000,
   firebase: {
