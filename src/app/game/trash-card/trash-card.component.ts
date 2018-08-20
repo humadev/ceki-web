@@ -31,8 +31,6 @@ export class TrashCardComponent implements OnInit {
     });
   }
 
-  ngOnInit() {}
-
   randomRotate() {
     let num = Math.floor(Math.random() * 90); // this will get a number between 1 and 99;
     num *= Math.floor(Math.random() * 2) === 1 ? 1 : -1;

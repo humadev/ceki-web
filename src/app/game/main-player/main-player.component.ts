@@ -63,9 +63,7 @@ export class MainPlayerComponent implements OnInit {
       this.serigat = this._engine.serigat.length;
       this.lawang = this._engine.lawang.length;
     });
-  }
 
-  ngOnInit() {
     const time = merge(
       timer(60000).pipe(
         map(res => {
