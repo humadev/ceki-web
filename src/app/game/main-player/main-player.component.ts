@@ -30,21 +30,31 @@ export class MainPlayerComponent implements OnInit {
   serigat = 0;
   lawang = 0;
   benchmark: boolean;
+  win = false;
+  lose = false;
 
   constructor(
     private _engine: GameEngineService,
     private _ws: WebsocketService
   ) {
     // this.cards = this._engine.playersManifest[this._engine.playerIndex].cards;
-    this._engine.gamePlay.subscribe(res => {
-      this.cards = res[this._engine.playerIndex].cards;
-      this.soca = this._engine.soca.length;
-      this.serigat = this._engine.serigat.length;
-      this.lawang = this._engine.lawang.length;
-    });
   }
 
   ngOnInit() {
+      this._engine.win.subscribe(res => {
+        this.win = res;
+      });
+      this._engine.lose.subscribe(res => {
+          this.lose = res;
+      });
+      this._engine.gamePlay.subscribe(res => {
+          if (res && res.length > 0) {
+              this.cards = res[this._engine.playerIndex].cards;
+              this.soca = this._engine.soca.length;
+              this.serigat = this._engine.serigat.length;
+              this.lawang = this._engine.lawang.length;
+          }
+      });
     this._engine.benchmark.subscribe(b => {
       this.benchmark = b;
     });

@@ -16,7 +16,9 @@ import {
   concat
 } from 'lodash-es';
 
-@Injectable()
+@Injectable({
+    providedIn: 'root'
+})
 export class GameEngineService {
   players: number;
 
@@ -25,7 +27,7 @@ export class GameEngineService {
 
   benchmark = new BehaviorSubject(true);
 
-  gamePlay = new Subject();
+  gamePlay: BehaviorSubject<any> = new BehaviorSubject(false);
   gameLogs = new Subject();
   autoMove = new Subject();
   myTurn: Subject<boolean> = new Subject();
@@ -45,6 +47,9 @@ export class GameEngineService {
   lawang = [];
   serigat = [];
   status = new BehaviorSubject('');
+  lastStatus = '';
+    win = new BehaviorSubject(false);
+    lose = new BehaviorSubject(false);
 
   constructor(
     private _rtc: WebrtcService,
@@ -54,6 +59,7 @@ export class GameEngineService {
     private auth: AuthService,
     private afAuth: AngularFireAuth
   ) {
+      console.log('construct');
     this._ws.socket.on('rejoin room', data => {
       this.gameLogs.next(
         `mulai kembali permainan sebagai pemain ${this.playerIndex + 1}`
@@ -72,6 +78,7 @@ export class GameEngineService {
           this._rtc.connecting(player.uid);
         }
       });
+        console.log('data rejoin', data.gameState.players[this.playerIndex]);
       this.turn = data.gameState.players[this.playerIndex].turn;
       this.pick = data.gameState.players[this.playerIndex].pick;
       this.throw = data.gameState.players[this.playerIndex].throw;
@@ -102,18 +109,20 @@ export class GameEngineService {
     });
 
     this._ws.socket.on('play', data => {
-      console.log(data);
-      data.players.forEach(player => {
-        if (player.uid !== this.auth.users.uid) {
-          console.log('trying connecting to peer: ', player.uid);
-          this._rtc.connecting(player.uid);
-        }
-      });
-      this.players = data.players.length;
-      this.playersManifest = data.players;
-      this.dealersCards = data.dealers;
-      this.gamePlay.next(this.playersManifest);
-      this.init = true;
+        console.log('start play', data);
+        data.players.forEach(player => {
+            if (player.uid !== this.auth.users.uid) {
+            console.log('trying connecting to peer: ', player.uid);
+            this._rtc.connecting(player.uid);
+            }
+        });
+        this.players = data.players.length;
+        this.playersManifest = data.players;
+        this.dealersCards = data.dealers;
+        this.isMecari(data.players[this.playerIndex].cards);
+        this.isNyaga(data.players[this.playerIndex].cards);
+        this.gamePlay.next(data.players);
+        this.init = true;
       localStorage.setItem(
         'gs',
         JSON.stringify({
@@ -130,6 +139,23 @@ export class GameEngineService {
     });
 
     this._rtc.$message.subscribe((data: any) => {
+        if(data.win) {
+            this.lose.next(true);
+        }
+        if (this.status.value === 'mecari') {
+            if (data.card[data.card.length - 1].no === this.lawang[0][0].no) {
+                alert('You win');
+                this.win.next(true);
+                this._rtc.sendAll({ win: true, index: this.playerIndex });
+            }
+        }
+        if (this.status.value === 'nyaga') {
+            if (data.card[data.card.length - 1].soroh === this.lawang[0][0].soroh) {
+                alert('You win');
+                this.win.next(true);
+                this._rtc.sendAll({ win: true, index: this.playerIndex });
+            }
+        }
       const timeNow = new Date();
       this.gameLogs.next(
         'Round trip time from webrtc ' + (timeNow.getTime() - data.date + ' ms')
@@ -146,6 +172,7 @@ export class GameEngineService {
           1
         );
       }
+
       this.dealersCards = data.dealers;
       this.gamePlay.next(this.playersManifest);
       if (data.turning && this.itsMyIndex(data.index)) {
@@ -172,58 +199,74 @@ export class GameEngineService {
   }
 
   dropInMain(e) {
-    if (this.pick === 1) {
-      this.playersManifest[this.playerIndex].cards.push(e.dragData.value);
-      if (e.dragData.type === 'dealer') {
-        this.dealersCards.splice(e.dragData.index, 1);
-      } else {
-        this.playersManifest[this.whosBefore()].trash.splice(
-          e.dragData.index,
-          1
-        );
+      let win = false;
+      if (this.status.value === 'mecari') {
+          if (e.dragData.value.no === this.lawang[0][0].no) {
+              win = true;
+              this.win.next(true);
+              this._rtc.sendAll({win: true, index: this.playerIndex});
+          }
+      } else if (this.status.value === 'nyaga') {
+          if (e.dragData.value.soroh === this.lawang[0][0].soroh) {
+              win = true;
+              this.win.next(true);
+              this._rtc.sendAll({ win: true, index: this.playerIndex });
+          }
       }
-      this.pick = 0;
-      if (this.pick === 0 && this.throw === 0) {
-        this.turn = false;
-        this.myTurn.next(false);
-        this.isMecari(this.playersManifest[this.playerIndex].cards);
-        this.isNyaga(this.playersManifest[this.playerIndex].cards);
-      }
-      const dateMove = new Date();
-      this.gameLogs.next(
-        `broadcast koneksi webrtc saat kartu pindah ke pemain`
-      );
-
-      const moveData = {
-        card: this.playersManifest[this.playerIndex].cards,
-        trash: this.playersManifest[this.playerIndex].trash,
-        otherTrash: {
-          index: this.whosBefore(),
-          trash: e.dragData.index
-        },
-        index: this.playerIndex,
-        roomID: this.roomID,
-        dealers: this.dealersCards,
-        turning: !this.turn,
-        turnIndex: this.whosTurn(this.playerIndex),
-        pick: this.pick,
-        throw: this.throw,
-        date: dateMove.getTime(),
-        soca: this.soca,
-        serigat: this.serigat,
-        lawang: this.lawang,
-        status: this.status.value
-      };
-      this._rtc.sendAll(moveData);
-      this.http
-        .post(
-          `http://${environment.endpoint}:${environment.port}/record`,
-          moveData
-        )
-        .subscribe(
-          res => console.log('record in server'),
-          err => console.log('error recording')
+      if (!win) {
+        if (this.pick === 1) {
+        this.playersManifest[this.playerIndex].cards.push(e.dragData.value);
+        if (e.dragData.type === 'dealer') {
+            this.dealersCards.splice(e.dragData.index, 1);
+        } else {
+            this.playersManifest[this.whosBefore()].trash.splice(
+            e.dragData.index,
+            1
+            );
+        }
+        this.pick = 0;
+        if (this.pick === 0 && this.throw === 0) {
+            this.turn = false;
+            this.myTurn.next(false);
+            this.isMecari(this.playersManifest[this.playerIndex].cards);
+            this.isNyaga(this.playersManifest[this.playerIndex].cards);
+        }
+        const dateMove = new Date();
+        this.gameLogs.next(
+            `broadcast koneksi webrtc saat kartu pindah ke pemain`
         );
+            console.log('soca in main', this.soca);
+        const moveData = {
+            card: this.playersManifest[this.playerIndex].cards,
+            trash: this.playersManifest[this.playerIndex].trash,
+            otherTrash: {
+            index: this.whosBefore(),
+            trash: e.dragData.index
+            },
+            index: this.playerIndex,
+            roomID: this.roomID,
+            dealers: this.dealersCards,
+            turning: !this.turn,
+            turnIndex: this.whosTurn(this.playerIndex),
+            pick: this.pick,
+            throw: this.throw,
+            date: dateMove.getTime(),
+            soca: this.soca,
+            serigat: this.serigat,
+            lawang: this.lawang,
+            status: this.status.value
+        };
+        this._rtc.sendAll(moveData);
+        this.http
+            .post(
+            `http://${environment.endpoint}:${environment.port}/record`,
+            moveData
+            )
+            .subscribe(
+            res => console.log('record in server'),
+            err => console.log('error recording')
+            );
+        }
     }
   }
 
@@ -244,6 +287,7 @@ export class GameEngineService {
       );
       this.isMecari(this.playersManifest[this.playerIndex].cards);
       this.isNyaga(this.playersManifest[this.playerIndex].cards);
+      console.log('soca in trash', this.soca);
       const moveData = {
         card: this.playersManifest[this.playerIndex].cards,
         trash: this.playersManifest[this.playerIndex].trash,
@@ -290,6 +334,13 @@ export class GameEngineService {
       this.playersManifest[this.playerIndex].cards.length - 1
     ];
 
+      // drop to main
+      if (this.pick === 1) {
+          this.playersManifest[this.playerIndex].cards.push(cardToMain);
+          this.dealersCards.splice(this.dealersCards.length - 1, 1);
+          this.pick = 0;
+      }
+
     // drop to trash
     if (this.throw === 1) {
       this.throw = 0;
@@ -301,13 +352,6 @@ export class GameEngineService {
     }
 
     this.gameLogs.next(`broadcast koneksi webrtc saat waktu habis`);
-
-    // drop to main
-    if (this.pick === 1) {
-      this.playersManifest[this.playerIndex].cards.push(cardToMain);
-      this.dealersCards.splice(this.dealersCards.length - 1, 1);
-      this.pick = 0;
-    }
 
     this.isMecari(this.playersManifest[this.playerIndex].cards);
     this.isNyaga(this.playersManifest[this.playerIndex].cards);
@@ -356,6 +400,7 @@ export class GameEngineService {
   }
 
   isMecari(cards) {
+      console.log('find mecari');
     // kondisi soca 1, serigat 2, lawang 1(menang ketika kartu
     // dari lawang menjadi sauca, mencari 1 kartu yang sama persis dengan lawang
     // , baik dibuka oleh pemain atau lawan, jika dibuka sendiri dinamakan ngandang, jika dibuka lawan ngenen
@@ -368,7 +413,9 @@ export class GameEngineService {
       this.serigat.length === 2 &&
       this.lawang.length === 1
     ) {
-      alert('mecari');
+        if (this.status.value !== 'mecari') {
+            alert('mecari');
+        }
       this.status.next('mecari');
     }
     console.log({
@@ -379,6 +426,7 @@ export class GameEngineService {
   }
 
   isNyaga(cards) {
+      console.log('find nyaga');
     // posisi nyaga, siap menang, kondisi sauca 2, serigat 1, lawang 1 /
     // serigat tp 2 kartu(lawang 1 = menang saat kondisi musuh membuka klan dari lawang disebut ngenen,
     // dan saat membuka sendiri disebut ngandang ketika kartu sama persis, serigat 2 kartu = dan
@@ -389,7 +437,9 @@ export class GameEngineService {
         this.serigat.length === 1 &&
         this.lawang.length === 1)
     ) {
-      alert('nyaga');
+        if (this.status.value !== 'nyaga') {
+            alert('nyaga');
+        }
       this.status.next('nyaga');
     } else {
       this.status.next('');

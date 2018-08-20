@@ -39,8 +39,6 @@ import { WebrtcService } from './webrtc.service';
     MatCardModule,
     MatDialogModule,
     MatProgressBarModule
-  ],
-  declarations: [],
-  providers: [GameEngineService]
+  ]
 })
 export class SharedModule {}

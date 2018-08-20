@@ -17,6 +17,8 @@ export class TableComponent implements OnInit {
   benchmark = false;
   players: number;
   ctrl = false;
+  win = false;
+  lose = false;
 
   constructor(public _engine: GameEngineService) {
     const gameState = JSON.parse(localStorage.getItem('gs'));
@@ -25,6 +27,12 @@ export class TableComponent implements OnInit {
   }
 
   ngOnInit() {
+      this._engine.win.subscribe(res => {
+          this.win = res;
+      });
+      this._engine.lose.subscribe(res => {
+          this.lose = res;
+      });
     this._engine.gameLogs.subscribe(res => this.logs.push(res));
     this._engine.benchmark.subscribe(bench => {
       this.benchmark = bench;

@@ -4,6 +4,13 @@
     <li *ngFor="let log of logs">{{log}}</li>
   </ul>
 </div>
+<div class='winner' *ngIf='win'>
+    <img src="assets/fireworks.gif">
+    You Win!!!
+</div>
+<div class='winner' *ngIf='lose'>
+  <img src="assets/sad.gif"> You Lose!!!
+</div>
 <div class="table" fxLayout="row wrap" fxLayoutAlign="center" *ngIf='_engine.init && players == 5'>
   <div fxFlex="15" fxLayoutAlign="center center">
     <ceki-trash-card [player]='shadowPlayerIndex(3)'></ceki-trash-card>

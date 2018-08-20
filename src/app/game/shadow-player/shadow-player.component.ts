@@ -21,7 +21,9 @@ export class ShadowPlayerComponent implements OnInit {
   constructor(private _engine: GameEngineService) {
     // this.cards = this._engine.playersManifest[this.player].cards;
     this._engine.gamePlay.subscribe(res => {
-      this.cards = this._engine.playersManifest[this._engine.playerIndex].cards;
+        if (res && res.length > 0) {
+            this.cards = this._engine.playersManifest[this._engine.playerIndex].cards;
+        }
     });
   }
 

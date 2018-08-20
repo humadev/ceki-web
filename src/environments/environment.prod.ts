@@ -1,6 +1,7 @@
 export const environment = {
   production: true,
-  websocket: 'ws://localhost:3000',
+  endpoint: '188.166.250.103',
+  port: 3000,
   firebase: {
     apiKey: 'AIzaSyCAOdeDi_JEqsfc5RM_XUkgs1uBroPXQNw',
     authDomain: 'ceki-webrtc.firebaseapp.com',

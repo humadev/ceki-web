@@ -18,9 +18,11 @@ export class AuthService {
     console.log('auth constructor');
     afAuth.user.subscribe(
       res => {
-        console.log('auth state', res.uid);
-        this.rtc.open(res.uid);
-        this.users = res;
+          if (res) {
+              console.log('auth state', res.uid);
+              this.rtc.open(res.uid);
+              this.users = res;
+          }
       },
       err => {
         console.log(err);
