@@ -1,3 +1,4 @@
+import { GameEngineService } from './../../shared/game-engine.service';
 import { Component, OnInit, Input } from '@angular/core';
 import { of } from 'rxjs';
 
@@ -7,31 +8,42 @@ import { of } from 'rxjs';
   styleUrls: ['./card.component.scss']
 })
 export class CardComponent implements OnInit {
-  @Input() class = ['portrait', 'open', 'main'];
-  @Input() cardNumber: number;
+  @Input()
+  class = ['portrait', 'open', 'main'];
+  @Input()
+  card: any;
   background: any;
-  @Input() rotate;
-  @Input() overview = false;
+  @Input()
+  rotate;
+  @Input()
+  overview = false;
+  @Input()
+  index;
+  @Input()
+  type;
+  @Input()
+  isDraggable = false;
+  @Input()
+  dragScope;
+  benchmark = false;
 
-  constructor() {}
+  constructor(private _engine: GameEngineService) {}
 
   ngOnInit() {
-    if (this.cardNumber) {
+    if (this.type === 'main' || this.type === 'trash') {
       this.background = {
-        'background-image': `url(/assets/cards/ceki${this.cardNumber}.png)`
+        'background-image': `url(/assets/cards/ceki-${this.card.soroh}-${
+          this.card.no
+        }.png)`
       };
     }
     if (this.rotate) {
       this.background.transform = `rotate(${this.randomRotate()}deg)`;
     }
 
-    // of(this.overview).subscribe(res => {
-    //   if (res) {
-    //     this.background.transform = `rotate(0deg)`;
-    //   } else if (this.rotate) {
-    //     // this.background.transform = `rotate(${this.randomRotate()}deg)`;
-    //   }
-    // });
+    this._engine.benchmark.subscribe(b => {
+      this.benchmark = b;
+    });
   }
 
   randomRotate() {

@@ -1,7 +1,5 @@
 import { Observable } from 'rxjs';
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { GameEngineService } from '../../shared/game-engine.service';
-import { WebsocketService } from '../../shared/websocket.service';
 import { AuthService } from '../../shared/auth.service';
 import {
   MatDialog,
@@ -9,6 +7,7 @@ import {
 } from '../../../../node_modules/@angular/material';
 import { RoomComponent } from '../room/room.component';
 import { JoinRoomComponent } from '../join-room/join-room.component';
+import { WebrtcService } from 'src/app/shared/webrtc.service';
 
 @Component({
   selector: 'ceki-play-room',
@@ -20,24 +19,24 @@ export class PlayRoomComponent implements OnDestroy {
   $createRoom: MatDialogRef<RoomComponent>;
   $joinRoom: MatDialogRef<JoinRoomComponent>;
 
-  constructor(
-    private _engine: GameEngineService,
-    private _ws: WebsocketService,
-    private _auth: AuthService,
-    private _dialog: MatDialog
-  ) {
+  constructor(private _auth: AuthService, private _dialog: MatDialog) {
     localStorage.removeItem('gs');
   }
 
   createRoom() {
-    this.$createRoom = this._dialog.open(RoomComponent);
+    this.$createRoom = this._dialog.open(RoomComponent, {
+      height: '500px',
+      width: '800px'
+    });
   }
 
   joinRoom() {
     this.$joinRoom = this._dialog.open(JoinRoomComponent, {
       data: {
         roomID: this.room
-      }
+      },
+      height: '500px',
+      width: '800px'
     });
   }
 

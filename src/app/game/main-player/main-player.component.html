@@ -1,7 +1,8 @@
 <div fxLayout fxLayoutAlign="center">
   <ng-template ngFor let-card let-i="index" [ngForOf]="cards">
     <span droppable dropScope="order" (onDrop)="dropInOrder($event, card, i)"></span>
-    <ceki-card draggable [cardNumber]='card' [dragData]="{value:card, index: i, type: 'main'}" [dragScope]="['order','trash']"></ceki-card>
+    <ceki-card isDraggable="true" [card]='card' [index]="i" type='main' [dragScope]="['order','trash']">{{card.no}}{{card.soroh}}</ceki-card>
   </ng-template>
-  <mat-progress-bar *ngIf="myTurn" mode="determinate" [value]="turnTime" class="turn-time"></mat-progress-bar>
+  <mat-progress-bar *ngIf="myTurn && !win && !lose" mode="determinate" [value]="turnTime" class="turn-time"></mat-progress-bar>
 </div>
+<div class='status' *ngIf="benchmark">Soca {{this.soca}} - serigat {{this.serigat}} - lawang {{this.lawang}}</div>

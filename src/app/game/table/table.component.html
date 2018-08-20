@@ -4,6 +4,12 @@
     <li *ngFor="let log of logs">{{log}}</li>
   </ul>
 </div>
+<div class='winner' *ngIf='win'>
+  <img src="assets/fireworks.gif"> You Win!!!
+</div>
+<div class='winner' *ngIf='lose'>
+  <img src="assets/sad.gif"> You Lose!!!
+</div>
 <div class="table" fxLayout="row wrap" fxLayoutAlign="center" *ngIf='_engine.init && players == 5'>
   <div fxFlex="15" fxLayoutAlign="center center">
     <ceki-trash-card [player]='shadowPlayerIndex(3)'></ceki-trash-card>
@@ -32,9 +38,9 @@
   </div>
 
   <div fxFlex="15" fxLayoutAlign="center center">
-    <ceki-trash-card [player]='shadowPlayerIndex(4)'></ceki-trash-card>
+    <ceki-trash-card [player]='shadowPlayerIndex(4)' canDrag="true"></ceki-trash-card>
   </div>
-  <div fxFlex="70" fxLayoutAlign="center center" droppable (onDrop)="onCardDropInMain($event)">
+  <div fxFlex="70" fxLayoutAlign="center center" droppable (onDrop)="onCardDropInMain($event)" dropScope="main">
     <ceki-main-player></ceki-main-player>
   </div>
   <div fxFlex="15" fxLayoutAlign="center center">
@@ -64,9 +70,9 @@
   </div>
 
   <div fxFlex="15" fxLayoutAlign="center center">
-    <ceki-trash-card [player]='shadowPlayerIndex(3)'></ceki-trash-card>
+    <ceki-trash-card [player]='shadowPlayerIndex(3)' canDrag="true"></ceki-trash-card>
   </div>
-  <div fxFlex="70" fxLayoutAlign="center center" droppable (onDrop)="onCardDropInMain($event)">
+  <div fxFlex="70" fxLayoutAlign="center center" droppable (onDrop)="onCardDropInMain($event)" dropScope="main">
     <ceki-main-player></ceki-main-player>
   </div>
   <div fxFlex="15" fxLayoutAlign="center center">
@@ -90,9 +96,9 @@
   </div>
 
   <div fxFlex="15" fxLayoutAlign="center center">
-    <ceki-trash-card [player]='shadowPlayerIndex(2)'></ceki-trash-card>
+    <ceki-trash-card [player]='shadowPlayerIndex(2)' canDrag="true"></ceki-trash-card>
   </div>
-  <div fxFlex="70" fxLayoutAlign="center center" droppable (onDrop)="onCardDropInMain($event)">
+  <div fxFlex="70" fxLayoutAlign="center center" droppable (onDrop)="onCardDropInMain($event)" dropScope="main">
     <ceki-main-player></ceki-main-player>
   </div>
   <div fxFlex="15" fxLayoutAlign="center center">
@@ -105,7 +111,7 @@
   </div>
 
   <div fxFlex="15" fxLayoutAlign="center center">
-    <ceki-trash-card [player]='shadowPlayerIndex(1)'></ceki-trash-card>
+    <ceki-trash-card [player]='shadowPlayerIndex(1)' canDrag="true"></ceki-trash-card>
   </div>
   <div fxFlex="70" fxLayoutAlign="center center">
     <ceki-dealer-card></ceki-dealer-card>
@@ -114,7 +120,7 @@
     <ceki-trash-card [player]='playerIndex' droppable (onDrop)="onCardDropInTrash($event)" dropScope="trash"></ceki-trash-card>
   </div>
 
-  <div fxFlex="100" fxLayoutAlign="center center" droppable (onDrop)="onCardDropInMain($event)">
+  <div fxFlex="100" fxLayoutAlign="center center" droppable (onDrop)="onCardDropInMain($event)" dropScope="main">
     <ceki-main-player></ceki-main-player>
   </div>
 </div>

@@ -22,16 +22,19 @@ export class RoomComponent implements OnInit {
     const player = {
       uid: this._auth.users.uid,
       name: this._auth.users.displayName,
-      email: this._auth.users.email
+      email: this._auth.users.email,
+      photo: this._auth.users.photoURL
     };
     this.players.push(player);
     this._ws.socket.emit('create room', player);
     this._engine.initiator = true;
+    this._engine.playerIndex = 0;
     this._ws.socket.on('create room', data => {
       this.roomID = data.roomID;
       this._engine.roomID = data.roomID;
     });
     this._ws.socket.on('room', msg => {
+      console.log(msg);
       this.players = msg;
     });
   }

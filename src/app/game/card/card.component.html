@@ -1,1 +1,4 @@
-<div class="card" [ngClass]="class" [ngStyle]="background"></div>
+<div class="card" [ngClass]="class" [ngStyle]="background" draggable [dragEnabled]="isDraggable" [dragData]="{index: index, value: card, type: type}"
+  [dragScope]='dragScope'>
+  <span class='caption' *ngIf="benchmark"><ng-content></ng-content></span>
+</div>

@@ -9,6 +9,6 @@ export class WebsocketService {
   socket;
 
   constructor() {
-    this.socket = io.connect(environment.websocket);
+      this.socket = io.connect(`ws://${environment.endpoint}:${environment.port}`);
   }
 }

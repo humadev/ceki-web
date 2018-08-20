@@ -10,16 +10,23 @@ import { TrashOverviewComponent } from '../trash-overview/trash-overview.compone
 })
 export class TrashCardComponent implements OnInit {
   cards = [];
-  @Input() player: number;
+  @Input()
+  player: number;
   class = ['portrait', 'trash', 'open'];
   overview = false;
   rotate = true;
+  @Input()
+  canDrag = false;
+  prevent = false;
 
   constructor(private _engine: GameEngineService, private _dialog: MatDialog) {
     // this.cards = this._engine.playersManifest[this.player].trash;
+  }
+
+  ngOnInit() {
     this._engine.gamePlay.subscribe(res => {
-      if (res[this.player]) {
-        this.cards = res[this.player].trash;
+      if (this._engine.playersManifest[this.player]) {
+        this.cards = this._engine.playersManifest[this.player].trash;
       }
     });
   }
@@ -32,10 +39,26 @@ export class TrashCardComponent implements OnInit {
     return num;
   }
 
-  @HostListener('click', ['$event'])
-  onClick() {
+  @HostListener('contextmenu', ['$event'])
+  onClick(e) {
+    e.preventDefault();
+    if (!this.prevent) {
+      this.openOverview();
+    }
+    this.prevent = false;
+  }
+
+  @HostListener('dblclick', ['$event'])
+  onDblClick() {
+    this.prevent = true;
+    alert('dblclick');
+  }
+
+  openOverview() {
     const dialogRef = this._dialog.open(TrashOverviewComponent, {
       data: { cards: this.cards },
+      maxWidth: '100vw',
+      maxHeight: '100vh',
       panelClass: 'trash-overview-panel'
     });
   }

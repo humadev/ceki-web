@@ -1,3 +1,4 @@
+import { WebrtcService } from 'src/app/shared/webrtc.service';
 import { Component } from '@angular/core';
 import {
   BreakpointObserver,
@@ -11,21 +12,24 @@ import { AuthService } from '../../shared/auth.service';
 @Component({
   selector: 'ceki-console',
   templateUrl: './console.component.html',
-  styleUrls: ['./console.component.css']
+  styleUrls: ['./console.component.scss']
 })
 export class ConsoleComponent {
   name;
+  photo;
   isHandset$: Observable<boolean> = this.breakpointObserver
     .observe(Breakpoints.Handset)
     .pipe(map(result => result.matches));
 
   constructor(
     private breakpointObserver: BreakpointObserver,
-    private auth: AuthService
+    private auth: AuthService,
+    public rtc: WebrtcService
   ) {
     this.auth.afAuth.authState.subscribe(res => {
       if (this.auth.afAuth.auth.currentUser) {
-        this.name = this.auth.afAuth.auth.currentUser.email;
+        this.name = this.auth.afAuth.auth.currentUser.displayName;
+        this.photo = this.auth.afAuth.auth.currentUser.photoURL;
       }
     });
   }

@@ -13,14 +13,14 @@ div {
 .benchmark {
   position: fixed;
   top: 0;
-  right: 0;
+  left: 0;
   background: black;
   color: white;
   opacity: 0.5;
   filter: alpha(opacity=50);
   z-index: 2000;
   width: 400px;
-  height: 400px;
+  height: 300px;
   padding: 5px;
   overflow: scroll;
   overflow-x: hidden;
@@ -40,5 +40,43 @@ div {
       font-family: 'Roboto Mono', monospace;
       font-size: 11px;
     }
+  }
+}
+
+.drag-border {
+  width: 70px;
+}
+
+.winner{
+    position: absolute;
+    width: 100vw;
+    height: 100vh;
+    text-align: center;
+    color: greenyellow;
+    font-size: 45px;
+    background: black;
+    opacity: 0.8;
+    filter: alpha(opacity=50);
+    z-index: 3000;
+    img{
+        margin: 0 auto;
+        display: block;
+    }
+}
+
+.lost {
+  position: absolute;
+  width: 100vw;
+  height: 100vh;
+  text-align: center;
+  color: greenyellow;
+  font-size: 45px;
+  background: black;
+  opacity: 0.8;
+  filter: alpha(opacity=50);
+  z-index: 3000;
+  img {
+    margin: 0 auto;
+    display: block;
   }
 }

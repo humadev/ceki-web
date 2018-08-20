@@ -1,4 +1,5 @@
 <div fxLayout="row" fxLayoutAlign="center">
-  <ceki-card *ngFor="let stack of cards; let i=index" class='portrait dealer closed' draggable="cards.length === i+1? true: false"
-    [dragData]="{index: i, value: stack, type: 'dealer'}"></ceki-card>
+  <ceki-card *ngFor="let stack of cards; let i=index" class='portrait dealer closed' [isDraggable]="i+1 === cards.length ? true: false"
+    [index]='i' [card]='stack' type='dealer' [dragScope]="['main']"><span *ngIf="i+1 === cards.length">{{stack.no}}{{stack.soroh}}</span>
+  </ceki-card>
 </div>

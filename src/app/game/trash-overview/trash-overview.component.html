@@ -1,7 +1,7 @@
 <div mat-dialog-content>
-  <div fxLayout fxLayoutAlign="center">
+  <div fxLayout='row wrap' fxLayoutAlign="center">
     <ng-template ngFor let-card let-i="index" [ngForOf]="data.cards">
-      <ceki-card draggable [cardNumber]='card' [dragData]="{value:card, index: i, type: 'main'}" [dragScope]="['order','trash']"></ceki-card>
+      <ceki-card draggable [card]='card' [index]="i" type='main'></ceki-card>
     </ng-template>
   </div>
 </div>

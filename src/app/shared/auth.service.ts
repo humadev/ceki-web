@@ -10,9 +10,13 @@ export class AuthService {
   users;
 
   constructor(public afAuth: AngularFireAuth, private _route: Router) {
+    console.log('auth constructor');
     afAuth.user.subscribe(
       res => {
-        this.users = res;
+        if (res) {
+          console.log('auth state', res.uid);
+          this.users = res;
+        }
       },
       err => {
         console.log(err);

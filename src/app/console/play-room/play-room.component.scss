@@ -1,8 +1,23 @@
-.card {
-  max-width: 300px;
-  display: inline-block;
-}
+.room {
+  text-align: center;
+  .button-room {
+    margin-top: 50px;
+    padding: 50px;
+    font-size: 30px;
+    margin-left: 20px;
+    border: none;
+    background-color: burlywood;
+    box-shadow: 3px 3px 10px black;
+    font-family: 'Source Sans Pro', sans-serif;
+    cursor: pointer;
+  }
 
-.container {
-  padding: 20px;
+  .text {
+    border-radius: 3px;
+    font-size: 14px;
+    width: 400px;
+    background-color: burlywood;
+    padding: 10px;
+    border: thin solid black;
+  }
 }

@@ -1,1 +1,4 @@
-<ceki-card [class]='class' *ngFor="let card of cards" [cardNumber]='card' [rotate]='rotate' [overview]='overview'></ceki-card>
+<ceki-card [class]='class' *ngFor="let card of cards;let i=index" type="trash" [card]='card' [index]='i' [rotate]='rotate'
+  [overview]='overview' [isDraggable]="(canDrag && cards.length === i+1)? true: false" [dragScope]="['main']">
+  <span *ngIf='cards.length === i+1'>{{card.no}}{{card.soroh}}</span>
+</ceki-card>
