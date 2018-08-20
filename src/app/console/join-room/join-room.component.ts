@@ -43,7 +43,7 @@ export class JoinRoomComponent implements OnInit {
       } else {
           this.http.get(`http://${environment.endpoint}:${environment.port}/record/getRoom`)
           .subscribe((res: any) => {
-              this._engine.roomID = res.room.roomid;
+              this._engine.roomID = res.room.room_key;
               this._ws.socket.on('room', data => {
                   this.players = data;
               });
@@ -52,7 +52,7 @@ export class JoinRoomComponent implements OnInit {
                   this._engine.playerIndex = data.index;
               });
               this._ws.socket.emit('join room', {
-                  roomID: res.room.roomid,
+                  roomID: res.room.room_key,
                   uid: this._auth.users.uid,
                   name: this._auth.users.displayName,
                   email: this._auth.users.email,
